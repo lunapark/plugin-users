@@ -1,0 +1,67 @@
+{
+    "name": "@luna-park/plugin-boilerplate",
+    "version": "1.0.0",
+    "private": false,
+    "description": "Boilerplate plugin for Luna Park",
+    "keywords": [
+        "luna-park",
+        "plugin",
+        "boilerplate"
+    ],
+    "homepage": "https://luna-park.app",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lunapark/plugin-boilerplate"
+    },
+    "author": {
+        "name": "Luna Park",
+        "url": "https://luna-park.app"
+    },
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js"
+        }
+    },
+    "module": "./dist/index.js",
+    "files": [
+        "dist/**"
+    ],
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite build --watch",
+        "dev:story": "histoire dev",
+        "preview": "luna-preview"
+    },
+    "dependencies": {
+        "@luna-park/design": "link:..\\core\\packages\\design",
+        "hash-wasm": "^4.12.0",
+        "vue": "^3.5.27"
+    },
+    "devDependencies": {
+        "@fortawesome/pro-solid-svg-icons": "link:..\\..\\@fortawesome\\pro-solid-svg-icons",
+        "@histoire/plugin-vue": "1.0.0-beta.1",
+        "@luna-park/eslint-config": "^1.0.3",
+        "@luna-park/plugin": "link:..\\core\\packages\\plugin",
+        "@types/node": "^25.1.0",
+        "@vitejs/plugin-vue": "^6.0.3",
+        "@vue/tsconfig": "^0.8.1",
+        "eslint": "^9.39.2",
+        "globals": "^17.2.0",
+        "histoire": "1.0.0-beta.1",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.54.0",
+        "vite": "npm:rolldown-vite@7.3.1",
+        "vite-plugin-css-injected-by-js": "^3.5.2",
+        "vue-tsc": "^3.2.4"
+    },
+    "peerDependencies": {
+        "@luna-park/design": "^1.0.1",
+        "vue": "^3.5.24"
+    },
+    "pnpm": {
+        "overrides": {
+            "vite": "npm:rolldown-vite@7.3.1"
+        }
+    }
+}
