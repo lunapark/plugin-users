@@ -17,7 +17,18 @@
             </div>
         </template>
         <div class="content">
-            test
+            <LGeneralPanel
+                v-if="currentPanel === EPanel.General"
+                :internals="internals"
+            />
+            <LRolesPanel
+                v-if="currentPanel === EPanel.Roles"
+                :internals="internals"
+            />
+            <LPermissionsPanel
+                v-if="currentPanel === EPanel.Permissions"
+                :internals="internals"
+            />
         </div>
     </LSettingWrapper>
 </template>
@@ -27,7 +38,15 @@ import { faIdCard, faKey, faTowerControl } from "@fortawesome/pro-solid-svg-icon
 import { LButton } from "@luna-park/design";
 import { ref } from "vue";
 
+import LGeneralPanel from "@/components/general/panels/LGeneralPanel.vue";
+import LPermissionsPanel from "@/components/general/panels/LPermissionsPanel.vue";
+import LRolesPanel from "@/components/general/panels/LRolesPanel.vue";
 import LSettingWrapper from "@/components/LSettingWrapper.vue";
+import type { TInternals } from "@/internals";
+
+const props = defineProps<{
+    internals: TInternals;
+}>();
 
 enum EPanel {
     General = "general",

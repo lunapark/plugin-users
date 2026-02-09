@@ -18,6 +18,7 @@ export async function getDefaultDatabase() {
                 id: "c6bd3045-d139-41e4-a935-97c6a6895017",
                 login: "admin",
                 password: passwordHash,
+                roles: ["admin"],
                 created_at: currentDate,
                 updated_at: currentDate
             }
@@ -27,6 +28,7 @@ export async function getDefaultDatabase() {
             id: LogicType.string({ name: "id", options: { freeze: true } }),
             login: LogicType.string({ name: "login", options: { freeze: true } }),
             password: LogicType.string({ name: "password", options: { freeze: true } }),
+            roles: LogicType.array(LogicType.string({ options: { freeze: true } }), { name: "roles", options: { freeze: true } }),
             created_at: LogicType.interface("Date", { name: "created_at", options: { freeze: true } }),
             updated_at: LogicType.interface("Date", { name: "updated_at", options: { freeze: true } })
         }, {

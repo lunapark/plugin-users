@@ -1,5 +1,5 @@
 import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
-import { makePlugin } from "@luna-park/plugin";
+import { EElementType, makePlugin } from "@luna-park/plugin";
 import { shallowRef } from "vue";
 
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
@@ -22,8 +22,9 @@ export default makePlugin({
     internals,
     lifecycle: {
         mount: async ({ addFile }) => {
+            const folder = addFile({ name: "Users", type: EElementType.Folder });
+            addFile(await getDefaultDatabase(), folder.id);
             console.log("Users plugin mounted!");
-            addFile(await getDefaultDatabase());
         }
     },
     name: "Users",

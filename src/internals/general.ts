@@ -3,6 +3,6 @@ export enum EIdentifierType {
     username = "username"
 }
 
-export type TGeneral = {
+export type TGeneralSettings = {
     identifier: EIdentifierType;
 };
