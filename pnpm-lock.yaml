@@ -7,6 +7,8 @@ settings:
 overrides:
   vite: npm:rolldown-vite@7.3.1
 
+pnpmfileChecksum: sha256-b/wXN40kS2i+Eqx5dZ1rvaECCBnEQBN4S9hZphu9ND8=
+
 importers:
 
   .:

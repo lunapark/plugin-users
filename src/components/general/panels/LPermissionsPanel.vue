@@ -26,6 +26,7 @@
                         error
                         :icon="faTrash"
                         square
+                        @click="deletePermission(permission.id)"
                     />
                 </div>
             </div>
@@ -49,6 +50,7 @@
                     :icon="faPlus"
                     primary
                     square
+                    @click="addNewPermission"
                 />
             </div>
         </div>
@@ -62,7 +64,7 @@ import { kebabCase } from "es-toolkit";
 import { computed, reactive } from "vue";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
-import type { TInternals } from "@/internals";
+import { addPermission, type TInternals } from "@/internals";
 
 const props = defineProps<{
     internals: TInternals;
@@ -74,6 +76,23 @@ const newPermission = reactive({
 });
 
 const defaultId = computed(() => kebabCase(newPermission.label));
+
+function addNewPermission() {
+    addPermission({
+        id: newPermission.id || defaultId.value,
+        label: newPermission.label
+    });
+
+    newPermission.label = "";
+    newPermission.id = "";
+}
+
+function deletePermission(permissionId: string) {
+    if (!confirm(`Are you sure you want to delete the permission "${ props.internals.permissions[permissionId].label }"?`)) {
+        return;
+    }
+}
+
 </script>
 
 <style scoped>

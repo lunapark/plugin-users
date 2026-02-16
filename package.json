@@ -1,5 +1,5 @@
 {
-    "name": "@luna-park/plugin-boilerplate",
+    "name": "@luna-park/plugin-users",
     "version": "1.0.0",
     "private": false,
     "description": "Boilerplate plugin for Luna Park",
@@ -11,7 +11,7 @@
     "homepage": "https://luna-park.app",
     "repository": {
         "type": "git",
-        "url": "https://github.com/lunapark/plugin-boilerplate"
+        "url": "https://github.com/lunapark/plugin-users"
     },
     "author": {
         "name": "Luna Park",

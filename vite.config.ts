@@ -12,7 +12,7 @@ export default defineConfig(() => {
                 entry: "src/index.ts",
                 fileName: "index",
                 formats: ["es"],
-                name: "@luna-park/plugin-boilerplate"
+                name: "@luna-park/plugin-users"
             },
             rolldownOptions: {
                 external: [...Object.keys(packageDefinition.peerDependencies || {})]

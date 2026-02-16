@@ -2,33 +2,13 @@
     <LPanelWrapper class="roles-panel">
         <h2>Roles</h2>
         <div class="roles">
-            <div
+            <LRoleCard
                 v-for="role of internals.roles"
                 :key="role.id"
-                class="role"
-            >
-                <LInput
-                    v-model="role.label"
-                    borderless
-                    class="input"
-                    label="Label"
-                />
-                <LInput
-                    v-model="role.id"
-                    borderless
-                    class="input"
-                    disabled
-                    label="Identifier"
-                />
-                <div class="delete">
-                    <LButton
-                        borderless
-                        error
-                        :icon="faTrash"
-                        square
-                    />
-                </div>
-            </div>
+                :permissions="internals.permissions"
+                :role="role"
+                @delete="deleteRole(role.id)"
+            />
             <div class="role">
                 <LInput
                     v-model="newRole.label"
@@ -40,15 +20,16 @@
                     v-model="newRole.id"
                     borderless
                     class="input"
-                    disabled
                     label="Identifier"
                     :placeholder="defaultId"
                 />
                 <LButton
                     borderless
+                    :disabled="!newRole.label"
                     :icon="faPlus"
                     primary
                     square
+                    @click="addNewRole"
                 />
             </div>
         </div>
@@ -56,13 +37,14 @@
 </template>
 
 <script setup lang="ts">
-import { faPlus, faTrash } from "@fortawesome/pro-solid-svg-icons";
+import { faPlus } from "@fortawesome/pro-solid-svg-icons";
 import { LButton, LInput } from "@luna-park/design";
 import { kebabCase } from "es-toolkit";
 import { computed, reactive } from "vue";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
-import type { TInternals } from "@/internals";
+import LRoleCard from "@/components/general/panels/LRoleCard.vue";
+import { addRole, type TInternals } from "@/internals";
 
 const props = defineProps<{
     internals: TInternals;
@@ -74,6 +56,25 @@ const newRole = reactive({
 });
 
 const defaultId = computed(() => kebabCase(newRole.label));
+
+function deleteRole(roleId: string) {
+    if (!confirm(`Are you sure you want to delete the role "${ props.internals.roles[roleId].label }"?`)) {
+        return;
+    }
+
+    delete props.internals.roles[roleId];
+}
+
+function addNewRole() {
+    addRole({
+        id: newRole.id || defaultId.value,
+        label: newRole.label,
+        permissions: []
+    });
+
+    newRole.label = "";
+    newRole.id = "";
+}
 </script>
 
 <style scoped>

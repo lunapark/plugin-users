@@ -30,10 +30,20 @@ export const internals: TInternals = {
 };
 
 export function addPermission(permission: TPermission) {
+    if (internals.permissions[permission.id]) {
+        alert(`Permission with id ${ permission.id } already exists.`);
+        return;
+    }
+
     internals.permissions[permission.id] = permission;
 }
 
 export function addRole(role: TRole) {
+    if (internals.roles[role.id]) {
+        alert(`Role with id ${ role.id } already exists.`);
+        return;
+    }
+
     internals.roles[role.id] = role;
 }
 
