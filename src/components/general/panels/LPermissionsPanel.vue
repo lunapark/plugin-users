@@ -64,11 +64,7 @@ import { kebabCase } from "es-toolkit";
 import { computed, reactive } from "vue";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
-import { addPermission, type TInternals } from "@/internals";
-
-const props = defineProps<{
-    internals: TInternals;
-}>();
+import { addPermission, internals } from "@/internals";
 
 const newPermission = reactive({
     id: "",
@@ -88,9 +84,11 @@ function addNewPermission() {
 }
 
 function deletePermission(permissionId: string) {
-    if (!confirm(`Are you sure you want to delete the permission "${ props.internals.permissions[permissionId].label }"?`)) {
+    if (!confirm(`Are you sure you want to delete the permission "${ internals.permissions[permissionId]?.label }"?`)) {
         return;
     }
+
+    delete internals.permissions[permissionId];
 }
 
 </script>

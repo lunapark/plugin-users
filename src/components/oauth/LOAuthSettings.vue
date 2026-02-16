@@ -41,31 +41,26 @@
 </template>
 
 <script setup lang="ts">
-
 import { faPlus } from "@fortawesome/pro-solid-svg-icons";
 import { LButton } from "@luna-park/design";
 import { computed, ref } from "vue";
 
 import LSettingWrapper from "@/components/LSettingWrapper.vue";
 import LProviderForm from "@/components/oauth/LProviderForm.vue";
-import { type TInternals } from "@/internals";
+import { internals } from "@/internals";
 import { createProvider } from "@/internals/providers.ts";
 
-const props = defineProps<{
-    internals: TInternals;
-}>();
-
 const selectedProviderId = ref("");
-const selectedProvider = computed(() => props.internals.providers[selectedProviderId.value]);
+const selectedProvider = computed(() => internals.providers[selectedProviderId.value]);
 
 function addProvider() {
     const provider = createProvider();
-    props.internals.providers[provider.id] = provider;
+    internals.providers[provider.id] = provider;
     selectedProviderId.value = provider.id;
 }
 
 function deleteProvider(providerId: string) {
-    delete props.internals.providers[providerId];
+    delete internals.providers[providerId];
 }
 </script>
 

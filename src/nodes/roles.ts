@@ -1,12 +1,17 @@
 /* eslint-disable sort-keys-custom-order/object-keys */
 import { LogicType, makeLogicNode } from "@luna-park/plugin";
 
+import { internals } from "@/internals";
+
 export default [
     makeLogicNode({
-        name: "roles/has-right",
+        name: "roles/has-permission",
         inputs: {
             in_exec: LogicType.exec(),
-            in_right: LogicType.string({ name: "right" }),
+            in_permission: LogicType.string({
+                name: "Permission",
+                dynamic: () => LogicType.string({ name: "Permission", enum: Object.values(internals.permissions).map((permission) => permission.id) })
+            })
         },
         outputs: {
             out_exec: LogicType.exec(),
@@ -19,10 +24,13 @@ export default [
     }),
 
     makeLogicNode({
-        name: "roles/assert-right",
+        name: "roles/assert-permission",
         inputs: {
             in_exec: LogicType.exec(),
-            in_right: LogicType.string({ name: "right" }),
+            in_permission: LogicType.string({
+                name: "Permission",
+                dynamic: () => LogicType.string({ name: "Permission", enum: Object.values(internals.permissions).map((permission) => permission.id) })
+            })
         },
         outputs: {
             out_exec: LogicType.exec()

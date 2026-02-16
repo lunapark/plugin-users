@@ -17,18 +17,9 @@
             </div>
         </template>
         <div class="content">
-            <LGeneralPanel
-                v-if="currentPanel === EPanel.General"
-                :internals="internals"
-            />
-            <LRolesPanel
-                v-if="currentPanel === EPanel.Roles"
-                :internals="internals"
-            />
-            <LPermissionsPanel
-                v-if="currentPanel === EPanel.Permissions"
-                :internals="internals"
-            />
+            <LGeneralPanel v-if="currentPanel === EPanel.General" />
+            <LRolesPanel v-if="currentPanel === EPanel.Roles" />
+            <LPermissionsPanel v-if="currentPanel === EPanel.Permissions" />
         </div>
     </LSettingWrapper>
 </template>
@@ -42,11 +33,6 @@ import LGeneralPanel from "@/components/general/panels/LGeneralPanel.vue";
 import LPermissionsPanel from "@/components/general/panels/LPermissionsPanel.vue";
 import LRolesPanel from "@/components/general/panels/LRolesPanel.vue";
 import LSettingWrapper from "@/components/LSettingWrapper.vue";
-import type { TInternals } from "@/internals";
-
-const props = defineProps<{
-    internals: TInternals;
-}>();
 
 enum EPanel {
     General = "general",

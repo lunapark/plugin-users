@@ -1,3 +1,5 @@
+import { reactive } from "vue";
+
 import { EIdentifierType, type TGeneralSettings } from "@/internals/general.ts";
 import type { TMailSettings } from "@/internals/mail.ts";
 import type { TProvider } from "@/internals/providers.ts";
@@ -11,7 +13,7 @@ export type TInternals = {
     roles: Record<string, TRole>;
 };
 
-export const internals: TInternals = {
+export const internals = reactive<TInternals>({
     general: {
         identifier: EIdentifierType.email
     },
@@ -27,7 +29,7 @@ export const internals: TInternals = {
     permissions: {},
     providers: {},
     roles: {}
-};
+});
 
 export function addPermission(permission: TPermission) {
     if (internals.permissions[permission.id]) {

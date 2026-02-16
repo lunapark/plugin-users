@@ -7,6 +7,7 @@ import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
 import { internals } from "@/internals";
 import { getDefaultDatabase } from "@/modules/users/database.ts";
 import hashNodes from "@/nodes/hash.ts";
+import rolesNodes from "@/nodes/roles.ts";
 
 import icon from "./logo.svg";
 
@@ -14,7 +15,8 @@ export default makePlugin({
     description: "Add user accounts, connections, and roles.",
     editor: {
         nodes: [
-            ...hashNodes
+            ...hashNodes,
+            ...rolesNodes
         ]
     },
     icon,

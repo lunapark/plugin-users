@@ -44,11 +44,7 @@ import { computed, reactive } from "vue";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
 import LRoleCard from "@/components/general/panels/LRoleCard.vue";
-import { addRole, type TInternals } from "@/internals";
-
-const props = defineProps<{
-    internals: TInternals;
-}>();
+import { addRole, internals } from "@/internals";
 
 const newRole = reactive({
     id: "",
@@ -58,11 +54,11 @@ const newRole = reactive({
 const defaultId = computed(() => kebabCase(newRole.label));
 
 function deleteRole(roleId: string) {
-    if (!confirm(`Are you sure you want to delete the role "${ props.internals.roles[roleId].label }"?`)) {
+    if (!confirm(`Are you sure you want to delete the role "${ internals.roles[roleId].label }"?`)) {
         return;
     }
 
-    delete props.internals.roles[roleId];
+    delete internals.roles[roleId];
 }
 
 function addNewRole() {

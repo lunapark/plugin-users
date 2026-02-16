@@ -60,16 +60,11 @@
 </template>
 
 <script setup lang="ts">
-
 import { LCheckbox, LDropdown, LInput } from "@luna-park/design";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
-import type { TInternals } from "@/internals";
+import { internals } from "@/internals";
 import { EIdentifierType } from "@/internals/general.ts";
-
-const props = defineProps<{
-    internals: TInternals;
-}>();
 
 const options = [
     { id: EIdentifierType.email, value: "Email" },
