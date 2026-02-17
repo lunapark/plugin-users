@@ -6,6 +6,7 @@ import type { TProvider } from "@/internals/providers.ts";
 import { addPermissionsToRole, createPermission, createRole, type TPermission, type TRole } from "@/internals/roles.ts";
 
 export type TInternals = {
+    files: Record<string, string>;
     general: TGeneralSettings;
     mail: TMailSettings;
     permissions: Record<string, TPermission>;
@@ -14,6 +15,7 @@ export type TInternals = {
 };
 
 export const internals = reactive<TInternals>({
+    files: {},
     general: {
         identifier: EIdentifierType.email
     },

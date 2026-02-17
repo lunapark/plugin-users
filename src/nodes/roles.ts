@@ -10,7 +10,10 @@ export default [
             in_exec: LogicType.exec(),
             in_permission: LogicType.string({
                 name: "Permission",
-                dynamic: () => LogicType.string({ name: "Permission", enum: Object.values(internals.permissions).map((permission) => permission.id) })
+                dynamic: () => LogicType.string({
+                    name: "Permission",
+                    enum: Object.fromEntries(Object.entries(internals.permissions).map(([id, permission]) => [id, permission.label]))
+                })
             })
         },
         outputs: {
@@ -29,7 +32,10 @@ export default [
             in_exec: LogicType.exec(),
             in_permission: LogicType.string({
                 name: "Permission",
-                dynamic: () => LogicType.string({ name: "Permission", enum: Object.values(internals.permissions).map((permission) => permission.id) })
+                dynamic: () => LogicType.string({
+                    name: "Permission",
+                    enum: Object.fromEntries(Object.entries(internals.permissions).map(([id, permission]) => [id, permission.label]))
+                })
             })
         },
         outputs: {

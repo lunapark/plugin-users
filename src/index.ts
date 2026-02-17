@@ -4,28 +4,27 @@ import { shallowRef } from "vue";
 
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
 import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
+import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
 import { internals } from "@/internals";
+import icon from "@/logo.svg";
 import { getDefaultDatabase } from "@/modules/users/database.ts";
-import hashNodes from "@/nodes/hash.ts";
-import rolesNodes from "@/nodes/roles.ts";
-
-import icon from "./logo.svg";
+import { nodes } from "@/nodes";
 
 export default makePlugin({
     description: "Add user accounts, connections, and roles.",
     editor: {
-        nodes: [
-            ...hashNodes,
-            ...rolesNodes
-        ]
+        nodes
     },
     icon,
     id: "users",
     internals,
     lifecycle: {
-        mount: async ({ addFile }) => {
-            const folder = addFile({ name: "Users", type: EElementType.Folder });
-            addFile(await getDefaultDatabase(), folder.id);
+        mount: async ({ addFile, getFile }) => {
+            if (!internals.files["database"] || !getFile(internals.files["database"])) {
+                const folder = addFile({ name: "Users", type: EElementType.Folder });
+                const file = addFile(await getDefaultDatabase(), folder.id);
+                internals.files["database"] = file.id;
+            }
             console.log("Users plugin mounted!");
         }
     },
@@ -41,5 +40,8 @@ export default makePlugin({
             icon: faShield,
             label: "OAuth"
         }
-    ]
+    ],
+    windows: {
+        OAuth: LOAuthWindow
+    }
 });

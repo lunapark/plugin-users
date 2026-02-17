@@ -35,6 +35,7 @@
     },
     "dependencies": {
         "@luna-park/design": "link:..\\core\\packages\\design",
+        "@vueuse/core": "^14.2.1",
         "es-toolkit": "^1.44.0",
         "hash-wasm": "^4.12.0",
         "vue": "^3.5.27"
