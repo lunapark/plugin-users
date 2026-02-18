@@ -18,26 +18,23 @@
         </template>
         <div class="content">
             <LGeneralPanel v-if="currentPanel === EPanel.General" />
-            <LRolesPanel v-if="currentPanel === EPanel.Roles" />
-            <LPermissionsPanel v-if="currentPanel === EPanel.Permissions" />
+            <LAccessPanel v-if="currentPanel === EPanel.Access" />
         </div>
     </LSettingWrapper>
 </template>
 
 <script setup lang="ts">
-import { faIdCard, faKey, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
+import { faIdCard, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
 import { LButton } from "@luna-park/design";
 import { ref } from "vue";
 
+import LAccessPanel from "@/components/general/panels/access/LAccessPanel.vue";
 import LGeneralPanel from "@/components/general/panels/LGeneralPanel.vue";
-import LPermissionsPanel from "@/components/general/panels/LPermissionsPanel.vue";
-import LRolesPanel from "@/components/general/panels/LRolesPanel.vue";
 import LSettingWrapper from "@/components/LSettingWrapper.vue";
 
 enum EPanel {
     General = "general",
-    Roles = "roles",
-    Permissions = "permissions"
+    Access = "access"
 }
 
 const buttons = [
@@ -48,13 +45,8 @@ const buttons = [
     },
     {
         icon: faIdCard,
-        label: "Roles",
-        panel: EPanel.Roles
-    },
-    {
-        icon: faKey,
-        label: "Permissions",
-        panel: EPanel.Permissions
+        label: "Access",
+        panel: EPanel.Access
     }
 ];
 

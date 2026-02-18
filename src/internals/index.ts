@@ -52,18 +52,20 @@ export function addRole(role: TRole) {
 }
 
 function initInternals() {
-    const permissionAdmin = createPermission({ id: "admin", label: "Admin" });
-    const permissionUser = createPermission({ id: "user", label: "User" });
+    const permissionManage = createPermission({ id: "manage", label: "Manage" });
+    const permissionWrite = createPermission({ id: "write", label: "Write" });
+    const permissionRead = createPermission({ id: "read", label: "Read" });
 
-    addPermission(permissionAdmin);
-    addPermission(permissionUser);
+    addPermission(permissionManage);
+    addPermission(permissionWrite);
+    addPermission(permissionRead);
 
     const roleAdmin = createRole({ id: "admin", label: "Admin" });
     const roleUser = createRole({ id: "user", label: "User" });
     const roleAnonymous = createRole({ id: "anonymous", label: "Anonymous" });
 
-    addPermissionsToRole(roleUser, [permissionUser]);
-    addPermissionsToRole(roleAdmin, [permissionUser, permissionAdmin]);
+    addPermissionsToRole(roleUser, [permissionRead]);
+    addPermissionsToRole(roleAdmin, [permissionRead, permissionWrite, permissionManage]);
 
     addRole(roleAdmin);
     addRole(roleUser);
