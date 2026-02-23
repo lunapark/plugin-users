@@ -15,11 +15,12 @@ export async function createSession(userId: string): Promise<TSession> {
 }
 
 export async function getSession(userId: string, token: string) {
-    return await database.sessions!.db.find({ token, user: userId })[0] as TSession | undefined;
+    return (await database.sessions!.db.find({ token, user: userId }))[0] as TSession | undefined;
 }
 
 export async function assertSessionValid(userId: string, token: string) {
     const session = await getSession(userId, token);
+
     if (!session) {
         throw httpError.Unauthorized("Invalid session.");
     }

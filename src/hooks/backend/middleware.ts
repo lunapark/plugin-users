@@ -28,6 +28,8 @@ export async function backendMiddleware(params: THookParams[EPluginHooks.Backend
         const session = await assertSessionValid(userCookie, sessionCookie);
         const user = await getUser(session.user);
 
+        console.log({ session, user });
+
         if (!user) {
             throw httpError.InternalServerError("User not found.");
         }

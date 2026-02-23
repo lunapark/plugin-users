@@ -11,17 +11,19 @@ import { initUsersDatabase } from "@/files/database/users.ts";
 import { initUserStore } from "@/files/store/user.ts";
 import { hooks } from "@/hooks";
 import { internals } from "@/internals";
+import { ping } from "@/logic/ping.ts";
 import icon from "@/logo.svg";
 import { nodes } from "@/nodes";
 
 export default makePlugin({
+    id: "users",
+    name: "Users",
     description: "Add user accounts, connections, and roles.",
     editor: {
         nodes
     },
     hooks,
     icon,
-    id: "users",
     internals,
     lifecycle: {
         mount: async ({ addFile, app, backend, getFile }) => {
@@ -33,10 +35,10 @@ export default makePlugin({
             await initUsersDatabase();
             await initSessionsDatabase();
             await initUserStore();
+            await ping();
             console.log("Users plugin mounted!");
         }
     },
-    name: "Users",
     settings: [
         {
             component: shallowRef(LGeneralSettings),
