@@ -44,7 +44,7 @@ export function addPermission(permission: TPermission) {
 
 export function addRole(role: TRole) {
     if (internals.roles[role.id]) {
-        alert(`Role with id ${ role.id } already exists.`);
+        alert(`Role with id "${ role.id }" already exists.`);
         return;
     }
 
@@ -52,20 +52,18 @@ export function addRole(role: TRole) {
 }
 
 function initInternals() {
-    const permissionManage = createPermission({ id: "manage", label: "Manage" });
     const permissionWrite = createPermission({ id: "write", label: "Write" });
     const permissionRead = createPermission({ id: "read", label: "Read" });
 
-    addPermission(permissionManage);
     addPermission(permissionWrite);
     addPermission(permissionRead);
 
     const roleAdmin = createRole({ id: "admin", label: "Admin" });
-    const roleUser = createRole({ id: "user", label: "User" });
-    const roleAnonymous = createRole({ id: "anonymous", label: "Anonymous" });
+    const roleUser = createRole({ freeze: true, id: "user", label: "User" });
+    const roleAnonymous = createRole({ freeze: true, id: "anonymous", label: "Anonymous" });
 
     addPermissionsToRole(roleUser, [permissionRead]);
-    addPermissionsToRole(roleAdmin, [permissionRead, permissionWrite, permissionManage]);
+    addPermissionsToRole(roleAdmin, [permissionRead, permissionWrite]);
 
     addRole(roleAdmin);
     addRole(roleUser);

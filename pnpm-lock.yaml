@@ -16,6 +16,9 @@ importers:
       '@luna-park/design':
         specifier: link:..\core\packages\design
         version: link:../core/packages/design
+      '@luna-park/http-errors':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.27(typescript@5.9.3))
@@ -485,6 +488,9 @@ packages:
       jiti: ^2.6.1
       stylelint: ^16.25.0
       typescript-eslint: ^8.46.3
+
+  '@luna-park/http-errors@1.0.0':
+    resolution: {integrity: sha512-KITb2Ij2uUBPPVPmmo6UeWrCklYU1vx7TD1pUfgqjduK74eox7MjlGCpqv5i5Pul5l0053YNN5RN4oExrfqocQ==}
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
@@ -2679,6 +2685,8 @@ snapshots:
       jiti: 2.6.1
       stylelint: 16.25.0(typescript@5.9.3)
       typescript-eslint: 8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+
+  '@luna-park/http-errors@1.0.0': {}
 
   '@marijn/find-cluster-break@1.0.2': {}
 

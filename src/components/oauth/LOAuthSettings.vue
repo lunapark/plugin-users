@@ -50,7 +50,7 @@ import LProviderForm from "@/components/oauth/LProviderForm.vue";
 import { internals } from "@/internals";
 import { createProvider } from "@/internals/providers.ts";
 
-const selectedProviderId = ref("");
+const selectedProviderId = ref(Object.keys(internals.providers)[0] ?? "");
 const selectedProvider = computed(() => internals.providers[selectedProviderId.value]);
 
 function addProvider() {

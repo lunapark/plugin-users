@@ -10,7 +10,7 @@
                     :options="options"
                 />
                 <span class="description">
-                    The identifier type used to identify users. This is stored as <code>login</code> in the database.
+                    The identifier type used to identify users. This is stored as <code>signup</code> in the database.
                 </span>
             </div>
         </section>

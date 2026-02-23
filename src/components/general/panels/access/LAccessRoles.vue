@@ -14,6 +14,7 @@
             />
             <LButton
                 borderless
+                :disabled="role.freeze"
                 :icon="faTrash"
                 small
                 square

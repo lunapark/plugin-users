@@ -1,4 +1,5 @@
 export type TRole = {
+    freeze?: boolean;
     id: string;
     label: string;
     permissions: Array<string>;

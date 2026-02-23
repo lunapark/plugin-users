@@ -1,13 +1,17 @@
 import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
-import { EElementType, makePlugin } from "@luna-park/plugin";
+import { makePlugin } from "@luna-park/plugin";
 import { shallowRef } from "vue";
 
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
 import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
 import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
+import { env } from "@/env.ts";
+import { initSessionsDatabase } from "@/files/database/sessions.ts";
+import { initUsersDatabase } from "@/files/database/users.ts";
+import { initUserStore } from "@/files/store/user.ts";
+import { hooks } from "@/hooks";
 import { internals } from "@/internals";
 import icon from "@/logo.svg";
-import { getDefaultDatabase } from "@/modules/users/database.ts";
 import { nodes } from "@/nodes";
 
 export default makePlugin({
@@ -15,16 +19,20 @@ export default makePlugin({
     editor: {
         nodes
     },
+    hooks,
     icon,
     id: "users",
     internals,
     lifecycle: {
-        mount: async ({ addFile, getFile }) => {
-            if (!internals.files["database"] || !getFile(internals.files["database"])) {
-                const folder = addFile({ name: "Users", type: EElementType.Folder });
-                const file = addFile(await getDefaultDatabase(), folder.id);
-                internals.files["database"] = file.id;
-            }
+        mount: async ({ addFile, app, backend, getFile }) => {
+            env.addFile = addFile;
+            env.getFile = getFile;
+            env.app = app;
+            env.backend = backend;
+
+            await initUsersDatabase();
+            await initSessionsDatabase();
+            await initUserStore();
             console.log("Users plugin mounted!");
         }
     },
@@ -38,7 +46,7 @@ export default makePlugin({
         {
             component: shallowRef(LOAuthSettings),
             icon: faShield,
-            label: "OAuth"
+            label: "OAuth2"
         }
     ],
     windows: {

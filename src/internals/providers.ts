@@ -1,29 +1,35 @@
 export type TProviderData = {
+    api: {
+        id: string;
+        url: string;
+        value: string;
+    };
     client: {
         id: string;
         secret: string;
     };
-    target: {
-        url: string;
-    };
-    token: {
-        body: Record<string, string>;
-        url: string;
+    url: {
+        authorization: string;
+        redirect: string;
+        token: string;
     };
 };
 
 export function createProviderData(): TProviderData {
     return {
+        api: {
+            id: "",
+            url: "",
+            value: ""
+        },
         client: {
             id: "",
             secret: ""
         },
-        target: {
-            url: ""
-        },
-        token: {
-            body: {},
-            url: ""
+        url: {
+            authorization: "",
+            redirect: "",
+            token: ""
         }
     };
 }

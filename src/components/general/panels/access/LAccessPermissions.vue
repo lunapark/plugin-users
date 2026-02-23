@@ -61,6 +61,8 @@ function deletePermission(permissionId: string) {
     if (!confirm(`Are you sure you want to delete the permission "${ internals.permissions[permissionId]?.label }"?`)) {
         return;
     }
+
+    delete internals.permissions[permissionId];
 }
 </script>
 
