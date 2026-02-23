@@ -4,6 +4,7 @@ import { type TFileStore } from "@luna-park/plugin";
 import { database, env } from "@/env.ts";
 import type { TUser } from "@/files/database/users.ts";
 import { internals } from "@/internals";
+import { ECookiesKey } from "@/logic/cookies.ts";
 import { getIdentity } from "@/logic/identity.ts";
 import { createSession } from "@/logic/session.ts";
 import { createAuthUser } from "@/logic/signup.ts";
@@ -35,7 +36,7 @@ async function findAuthUser(providerId: string, id: string) {
         throw httpError.InternalServerError("Can't find identity information in authentication response.");
     }
 
-    const user = await database.user!.db.find({ auth: { [providerId]: id } })[0];
+    const user = await database.users!.db.find({ auth: { [providerId]: id } })[0];
 
     if (!user) {
         throw httpError.NotFound("User not found.");
@@ -47,8 +48,8 @@ async function findAuthUser(providerId: string, id: string) {
 export async function createUserSession(user: TUser) {
     const session = await createSession(user.id);
 
-    env.backend.cookies["session"] = { value: session.id };
-    env.backend.cookies["user"] = { value: user.id };
+    env.backend.cookies[ECookiesKey.Session] = { value: session.token };
+    env.backend.cookies[ECookiesKey.User] = { value: user.id };
 
     const userStore = env.getFile(internals.files["user-store"]!) as TFileStore;
     userStore.value.isConnected = true;

@@ -28,7 +28,7 @@ export default [
             }
         },
         methods: {
-            in_exec() {
+            async in_exec() {
                 const target = internals.providers[this.in_provider]?.data.development.url.authorization;
 
                 if (target) {

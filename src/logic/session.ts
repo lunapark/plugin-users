@@ -7,7 +7,7 @@ import { generateHexToken } from "@/logic/utils.ts";
 export async function createSession(userId: string): Promise<TSession> {
     const token = generateHexToken();
 
-    return await database.session!.db.insert({
+    return await database.sessions!.db.insert({
         expires: Date.now() + 1000 * 60 * 60 * 24 * 365, // 1 year
         token,
         user: userId

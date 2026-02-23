@@ -6,12 +6,12 @@ import { database, env } from "@/env.ts";
 import { internals } from "@/internals";
 
 export async function initUsersDatabase() {
-    if (!internals.files["user-db"] || !env.getFile(internals.files["user-db"])) {
+    if (!internals.files["users-db"] || !env.getFile(internals.files["users-db"])) {
         const file = env.addFile(await getUsersDatabase());
-        internals.files["user-db"] = file.id;
+        internals.files["users-db"] = file.id;
     }
 
-    database["user"] = env.getFile(internals.files["user-db"]) as TFileDatabase;
+    database["users"] = env.getFile(internals.files["users-db"]) as TFileDatabase;
 }
 
 async function getUsersDatabase() {
@@ -24,18 +24,19 @@ async function getUsersDatabase() {
     const currentDate = new Date().toISOString();
 
     return {
+        name: "Users",
+        type: EElementType.Database,
         data: [
             {
+                id: "c6bd3045-d139-41e4-a935-97c6a6895017",
                 auth: {},
                 created_at: currentDate,
-                id: "c6bd3045-d139-41e4-a935-97c6a6895017",
                 login: "admin",
                 password: passwordHash,
                 roles: ["admin"],
                 updated_at: currentDate
             }
         ],
-        name: "Users",
         schema: LogicType.object({
             /* eslint-disable sort-keys-custom-order/object-keys */
             id: LogicType.string({ name: "id", options: { freeze: true, readonly: true } }),
@@ -48,8 +49,7 @@ async function getUsersDatabase() {
             /* eslint-enable sort-keys-custom-order/object-keys */
         }, {
             options: { freeze: true, insert: -2 }
-        }),
-        type: EElementType.Database
+        })
     } satisfies Partial<TFileDatabase<true>>;
 }
 

@@ -7,7 +7,7 @@ import { authLogin, createUserSession } from "@/logic/login.ts";
 import { authSignup } from "@/logic/signup.ts";
 
 export async function connect(login: string, password: string) {
-    const user = await database.user!.db.find({ login })[0];
+    const user = await database.users!.db.find({ login })[0];
 
     if (!user) {
         throw httpError.NotFound("User not found.");

@@ -1,6 +1,7 @@
 import { httpError } from "@luna-park/http-errors";
 import { EPluginHooks, LogicType, type THookParams } from "@luna-park/plugin";
 
+import { ECookiesKey } from "@/logic/cookies.ts";
 import { assertSessionValid } from "@/logic/session.ts";
 import { getUser } from "@/logic/user.ts";
 
@@ -15,8 +16,8 @@ function getAnonymousUser() {
 export async function backendMiddleware(params: THookParams[EPluginHooks.BackendMiddleware]) {
     const cookies = params.cookies;
 
-    const sessionCookie = cookies["session"]?.value;
-    const userCookie = cookies["user"]?.value;
+    const sessionCookie = cookies[ECookiesKey.Session]?.value;
+    const userCookie = cookies[ECookiesKey.User]?.value;
 
     if (!sessionCookie || !userCookie) {
         params.setContextVar("in_user", getAnonymousUser());
