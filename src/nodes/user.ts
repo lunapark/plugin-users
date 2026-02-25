@@ -27,14 +27,15 @@ export default [
     makeLogicNode({
         name: "user/disconnect",
         inputs: {
-            in_exec: LogicType.exec()
+            in_exec: LogicType.exec(),
+            in_mode: LogicType.string({ name: "Mode", default: "logout", enum: ["logout", "all"] })
         },
         outputs: {
             out_exec: LogicType.exec()
         },
         methods: {
             async in_exec() {
-                await disconnect();
+                await disconnect(this.in_mode);
                 await this.out_exec();
             }
         }

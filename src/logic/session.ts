@@ -36,3 +36,7 @@ export async function assertSessionValid(userId: string, token: string) {
 export async function deleteSession(userId: string, token: string) {
     return await database.sessions!.db.delete({ token, user: userId });
 }
+
+export async function deleteAllSession(userId: string) {
+    return await database.sessions!.db.delete({ user: userId });
+}
