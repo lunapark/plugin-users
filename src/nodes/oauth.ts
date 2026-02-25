@@ -16,7 +16,7 @@ export default [
                     enum: Object.fromEntries(Object.entries(internals.providers).map(([id, provider]) => [id, provider.label]))
                 })
             }),
-            in_mode: LogicType.string({ name: "Mode", enum: ["login", "signup", "both"], default: "both" })
+            in_mode: LogicType.string({ name: "Mode", default: "signup", enum: ["login", "signup", "both"] })
             /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {

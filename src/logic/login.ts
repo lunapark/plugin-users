@@ -7,7 +7,8 @@ import { internals } from "@/internals";
 import { ECookiesKey } from "@/logic/cookies.ts";
 import { getIdentity } from "@/logic/identity.ts";
 import { createSession } from "@/logic/session.ts";
-import { createAuthUser } from "@/logic/signup.ts";
+import { createAuthUser, createPasswordUser } from "@/logic/signup.ts";
+import { argon2Verify } from "hash-wasm";
 
 export async function authLogin(providerId: string, code: string, signup?: boolean) {
     const provider = internals.providers[providerId]?.data.development;
@@ -40,6 +41,38 @@ async function findAuthUser(providerId: string, id: string) {
 
     if (!user) {
         throw httpError.NotFound("User not found.");
+    }
+
+    return user as TUser;
+}
+
+export async function passwordLogin(login: string, password: string, signup?: boolean) {
+    try {
+        return await findPasswordUser(login, password);
+    }
+    catch (error) {
+        if (signup) {
+            return await createPasswordUser(login, password);
+        }
+        else {
+            throw error;
+        }
+    }
+}
+
+async function findPasswordUser(login: string, password: string) {
+    const user = await database.users!.db.find({ login })[0];
+
+    if (!user) {
+        throw httpError.NotFound("User not found.");
+    }
+
+    if (!user.password) {
+        throw httpError.Unauthorized("User doesn't have a password.");
+    }
+
+    if (!await argon2Verify({ hash: user.password, password })) {
+        throw httpError.Unauthorized("Invalid password.");
     }
 
     return user as TUser;

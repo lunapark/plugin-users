@@ -1,25 +1,26 @@
 import { httpError } from "@luna-park/http-errors";
-import { argon2Verify } from "hash-wasm";
 
-import { database } from "@/env.ts";
 import type { TUser } from "@/files/database/users.ts";
-import { authLogin, createUserSession } from "@/logic/login.ts";
-import { authSignup } from "@/logic/signup.ts";
+import { authLogin, createUserSession, passwordLogin } from "@/logic/login.ts";
+import { authSignup, createPasswordUser } from "@/logic/signup.ts";
 
-export async function connect(login: string, password: string) {
-    const user = await database.users!.db.find({ login })[0];
+export async function passwordConnect(login: string, password: string, mode: "login" | "signup" | "both") {
+    let user: TUser;
 
-    if (!user) {
-        throw httpError.NotFound("User not found.");
+    switch (mode) {
+        case "login":
+            user = await passwordLogin(login, password);
+            break;
+        case "both":
+            user = await passwordLogin(login, password, true);
+            break;
+        case "signup":
+            user = await createPasswordUser(login, password);
+            break;
     }
 
-    const valid = await argon2Verify({
-        hash: user.password,
-        password
-    });
-
-    if (!valid) {
-        throw httpError.Unauthorized("Invalid password.");
+    if (!user) {
+        throw httpError.InternalServerError("Can't connect to provider.");
     }
 
     await createUserSession(user);

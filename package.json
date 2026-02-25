@@ -39,7 +39,7 @@
         "@vueuse/core": "^14.2.1",
         "es-toolkit": "^1.44.0",
         "hash-wasm": "^4.12.0",
-        "vue": "^3.5.28"
+        "vue": "^3.5.29"
     },
     "devDependencies": {
         "@fortawesome/pro-solid-svg-icons": "link:..\\..\\@fortawesome\\pro-solid-svg-icons",
@@ -55,7 +55,7 @@
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.56.1",
         "vite": "npm:rolldown-vite@7.3.1",
-        "vite-plugin-css-injected-by-js": "^3.5.2",
+        "vite-plugin-css-injected-by-js": "^4.0.0",
         "vue-tsc": "^3.2.5"
     },
     "peerDependencies": {
