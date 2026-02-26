@@ -1,4 +1,4 @@
-import { EPluginHooks, type THookParams } from "@luna-park/plugin";
+import type { EPluginHooks, THookParams } from "@luna-park/plugin";
 
 import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
 

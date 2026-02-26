@@ -1,5 +1,6 @@
 import { httpError } from "@luna-park/http-errors";
-import { type TFileStore } from "@luna-park/plugin";
+import type { TFileStore } from "@luna-park/plugin";
+import { argon2Verify } from "hash-wasm";
 
 import { database, env } from "@/env.ts";
 import type { TUser } from "@/files/database/users.ts";
@@ -8,7 +9,6 @@ import { ECookiesKey } from "@/logic/cookies.ts";
 import { getIdentity } from "@/logic/identity.ts";
 import { createSession } from "@/logic/session.ts";
 import { createAuthUser, createPasswordUser } from "@/logic/signup.ts";
-import { argon2Verify } from "hash-wasm";
 
 export async function authLogin(providerId: string, code: string, signup?: boolean) {
     const provider = internals.providers[providerId]?.data.development;

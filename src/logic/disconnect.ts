@@ -1,4 +1,4 @@
-import { type TFileStore } from "@luna-park/plugin";
+import type { TFileStore } from "@luna-park/plugin";
 
 import { env } from "@/env.ts";
 import { internals } from "@/internals";

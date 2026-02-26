@@ -35,21 +35,21 @@ export function createProviderData(): TProviderData {
 }
 
 export type TProvider = {
+    id: string;
     data: {
         development: TProviderData;
         production: TProviderData;
     };
-    id: string;
     label: string;
 };
 
 export function createProvider(): TProvider {
     return {
+        id: crypto.randomUUID(),
         data: {
             development: createProviderData(),
             production: createProviderData()
         },
-        id: crypto.randomUUID(),
         label: "New provider"
     };
 }

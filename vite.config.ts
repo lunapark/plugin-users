@@ -1,6 +1,7 @@
 import vue from "@vitejs/plugin-vue";
 import path from "path";
-import { defineConfig, type UserConfig } from "vite";
+import type { UserConfig } from "vite";
+import { defineConfig } from "vite";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 import packageDefinition from "./package.json" with { type: "json" };
@@ -9,10 +10,10 @@ export default defineConfig(() => {
     const config: UserConfig = {
         build: {
             lib: {
+                name: "@luna-park/plugin-users",
                 entry: "src/index.ts",
                 fileName: "index",
-                formats: ["es"],
-                name: "@luna-park/plugin-users"
+                formats: ["es"]
             },
             rolldownOptions: {
                 external: [...Object.keys(packageDefinition.peerDependencies || {})]

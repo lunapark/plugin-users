@@ -69,9 +69,9 @@ import { LInput } from "@luna-park/design";
 import type { TProviderData } from "@/internals/providers.ts";
 
 const props = defineProps<{
+    title: string;
     description: string;
     providerData: TProviderData;
-    title: string;
 }>();
 </script>
 

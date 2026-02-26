@@ -1,9 +1,11 @@
 import { reactive } from "vue";
 
-import { EIdentifierType, type TGeneralSettings } from "@/internals/general.ts";
+import type { TGeneralSettings } from "@/internals/general.ts";
+import { EIdentifierType } from "@/internals/general.ts";
 import type { TMailSettings } from "@/internals/mail.ts";
 import type { TProvider } from "@/internals/providers.ts";
-import { addPermissionsToRole, createPermission, createRole, type TPermission, type TRole } from "@/internals/roles.ts";
+import type { TPermission, TRole } from "@/internals/roles.ts";
+import { addPermissionsToRole, createPermission, createRole } from "@/internals/roles.ts";
 
 export type TInternals = {
     files: Record<string, string>;
@@ -59,8 +61,8 @@ function initInternals() {
     addPermission(permissionRead);
 
     const roleAdmin = createRole({ id: "admin", label: "Admin" });
-    const roleUser = createRole({ freeze: true, id: "user", label: "User" });
-    const roleAnonymous = createRole({ freeze: true, id: "anonymous", label: "Anonymous" });
+    const roleUser = createRole({ id: "user", freeze: true, label: "User" });
+    const roleAnonymous = createRole({ id: "anonymous", freeze: true, label: "Anonymous" });
 
     addPermissionsToRole(roleUser, [permissionRead]);
     addPermissionsToRole(roleAdmin, [permissionRead, permissionWrite]);

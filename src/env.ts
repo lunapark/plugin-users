@@ -1,4 +1,4 @@
-import { type TEnv, type TFileDatabase } from "@luna-park/plugin";
+import type { TEnv, TFileDatabase } from "@luna-park/plugin";
 
 export const env: TEnv = {};
 

@@ -1,10 +1,10 @@
 import { httpError } from "@luna-park/http-errors";
+import { argon2id } from "hash-wasm";
 
 import { database } from "@/env.ts";
 import type { TUser } from "@/files/database/users.ts";
 import { internals } from "@/internals";
 import { getIdentity } from "@/logic/identity.ts";
-import { argon2id } from "hash-wasm";
 
 export async function authSignup(providerId: string, code: string) {
     const provider = internals.providers[providerId]?.data.development;
@@ -32,10 +32,10 @@ export async function createAuthUser(providerId: string, user: { id: string; val
     }
 
     const existingProvider = await database.users!.db.find({
-        "auth": {
+        auth: {
             [providerId]: user.id
         }
-    })
+    });
 
     if (existingProvider) {
         throw httpError.Conflict("User already exists with this provider.");
@@ -60,7 +60,7 @@ export async function createPasswordUser(login: string, password: string) {
     const salt = new Uint8Array(64);
     crypto.getRandomValues(salt);
 
-    const hash = await argon2id({ hashLength: 64, iterations: 256, memorySize: 2048, outputType: "encoded", parallelism: 1, password, salt })
+    const hash = await argon2id({ hashLength: 64, iterations: 256, memorySize: 2048, outputType: "encoded", parallelism: 1, password, salt });
 
     return (await database.users!.db.insert({
         login,

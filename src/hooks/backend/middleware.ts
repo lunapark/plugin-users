@@ -1,5 +1,6 @@
 import { httpError } from "@luna-park/http-errors";
-import { EPluginHooks, LogicType, type THookParams } from "@luna-park/plugin";
+import type { EPluginHooks, THookParams } from "@luna-park/plugin";
+import { LogicType } from "@luna-park/plugin";
 
 import { ECookiesKey } from "@/logic/cookies.ts";
 import { assertSessionValid } from "@/logic/session.ts";

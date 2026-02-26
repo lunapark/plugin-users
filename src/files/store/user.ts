@@ -14,6 +14,7 @@ export async function initUserStore() {
 async function getUserStore() {
     return {
         name: "User Store",
+        type: EElementType.Store,
         schema: LogicType.object({
             isConnected: LogicType.boolean({ name: "isConnected", options: { freeze: true } }),
             user: LogicType.object({
@@ -27,7 +28,6 @@ async function getUserStore() {
             })
         }, {
             options: { freeze: true }
-        }),
-        type: EElementType.Store
+        })
     } satisfies Partial<TFileStore<true>>;
 }

@@ -55,6 +55,7 @@ const selectedProvider = computed(() => internals.providers[selectedProviderId.v
 
 function addProvider() {
     const provider = createProvider();
+    provider.data.development.url.redirect = "https://luna-park.app/plugin?plugin=@luna-park/users&window=OAuth";
     internals.providers[provider.id] = provider;
     selectedProviderId.value = provider.id;
 }
