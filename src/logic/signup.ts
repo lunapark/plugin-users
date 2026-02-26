@@ -23,19 +23,19 @@ export async function createAuthUser(providerId: string, user: { id: string; val
         throw httpError.InternalServerError("Can't find identity information in authentication response.");
     }
 
-    const existingUser = await database.users!.db.find({
+    const existingUser = (await database.users!.db.find({
         login: user.value
-    })[0];
+    }))[0];
 
     if (existingUser) {
         throw httpError.Conflict("User already exists with this login.");
     }
 
-    const existingProvider = await database.users!.db.find({
+    const existingProvider = (await database.users!.db.find({
         auth: {
             [providerId]: user.id
         }
-    });
+    }))[0];
 
     if (existingProvider) {
         throw httpError.Conflict("User already exists with this provider.");
