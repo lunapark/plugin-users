@@ -2,7 +2,7 @@
     "name": "@luna-park/plugin-users",
     "version": "1.0.0",
     "private": false,
-    "description": "Boilerplate plugin for Luna Park",
+    "description": "Users plugin for Luna Park.",
     "keywords": [
         "luna-park",
         "plugin",
