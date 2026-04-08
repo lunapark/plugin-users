@@ -37,7 +37,8 @@ async function findAuthUser(providerId: string, id: string) {
         throw httpError.InternalServerError("Can't find identity information in authentication response.");
     }
 
-    const user = await database.users!.db.find({ auth: { [providerId]: id } })[0];
+    const db = database.users!.db;
+    const user = (await db.find({ auth: { [providerId]: id } }))[0];
 
     if (!user) {
         throw httpError.NotFound("User not found.");
