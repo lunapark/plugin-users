@@ -1,6 +1,6 @@
 {
     "name": "@luna-park/plugin-users",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "private": false,
     "description": "Users plugin for Luna Park.",
     "keywords": [
@@ -65,12 +65,5 @@
     "overrides": {
         "@fortawesome/pro-solid-svg-icons": "link:..\\..\\@fortawesome\\pro-solid-svg-icons",
         "@fortawesome/pro-regular-svg-icons": "link:..\\..\\@fortawesome\\pro-regular-svg-icons"
-    },
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild",
-            "unrs-resolver",
-            "vue-demi"
-        ]
     }
 }

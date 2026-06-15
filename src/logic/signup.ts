@@ -51,7 +51,7 @@ export async function createAuthUser(providerId: string, user: { id: string; val
 }
 
 export async function createPasswordUser(login: string, password: string) {
-    const existingUser = await database.users!.db.find({ login })[0];
+    const existingUser = (await database.users!.db.find({ login }))[0];
 
     if (existingUser) {
         throw httpError.Conflict("User already exists with this login.");

@@ -52,7 +52,7 @@ export async function passwordLogin(login: string, password: string, signup?: bo
         return await findPasswordUser(login, password);
     }
     catch (error) {
-        if (signup) {
+        if (error.message === "User not found." && signup) {
             return await createPasswordUser(login, password);
         }
         else {
@@ -62,7 +62,7 @@ export async function passwordLogin(login: string, password: string, signup?: bo
 }
 
 async function findPasswordUser(login: string, password: string) {
-    const user = await database.users!.db.find({ login })[0];
+    const user = (await database.users!.db.find({ login }))[0];
 
     if (!user) {
         throw httpError.NotFound("User not found.");
