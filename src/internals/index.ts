@@ -2,7 +2,6 @@ import { reactive } from "vue";
 
 import type { TGeneralSettings } from "@/internals/general.ts";
 import { EIdentifierType } from "@/internals/general.ts";
-import type { TMailSettings } from "@/internals/mail.ts";
 import type { TProvider } from "@/internals/providers.ts";
 import type { TPermission, TRole } from "@/internals/roles.ts";
 import { addPermissionsToRole, createPermission, createRole } from "@/internals/roles.ts";
@@ -10,7 +9,6 @@ import { addPermissionsToRole, createPermission, createRole } from "@/internals/
 export type TInternals = {
     files: Record<string, string>;
     general: TGeneralSettings;
-    mail: TMailSettings;
     permissions: Record<string, TPermission>;
     providers: Record<string, TProvider>;
     roles: Record<string, TRole>;
@@ -20,15 +18,6 @@ export const internals = reactive<TInternals>({
     files: {},
     general: {
         identifier: EIdentifierType.email
-    },
-    mail: {
-        auth: {
-            password: "",
-            user: ""
-        },
-        host: "",
-        port: 465,
-        secure: true
     },
     permissions: {},
     providers: {},

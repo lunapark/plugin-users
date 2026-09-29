@@ -2,7 +2,7 @@ import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
 import { makePlugin } from "@luna-park/plugin";
 import { shallowRef } from "vue";
 
-import { backImports, getInjections } from "@/build.ts";
+import { backImports, getEnv, getInjections } from "@/build.ts";
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
 import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
 import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
@@ -23,6 +23,7 @@ export default makePlugin({
     description: "Add user accounts, connections, and roles.",
     build: {
         backImports,
+        env: getEnv,
         injections: getInjections
     },
     editor: {

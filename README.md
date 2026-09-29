@@ -1,65 +1,88 @@
-# @luna-park/plugin-users
+# 👥 Users plugin for Luna Park
 
-Users plugin for the **Luna Park** editor. This package adds user accounts, connections (OAuth2), and role-based management to your visual scripting environment.
+Add **accounts, sessions, roles and OAuth sign-in** to your Luna Park app, and lock your backend routes behind **guards**, all without writing auth code.
 
-## Features
+What you build in the editor preview is exactly what runs once deployed: the same logic powers both, backed by the editor database while you design and by PostgreSQL in production.
 
-- **User Management**: Signup, login, and session handling.
-- **Role-Based Access Control**: Assign roles and verify permissions.
-- **OAuth2 Integration**: Connect with external providers (e.g., Google, GitHub).
-- **Security**: Argon2id hashing for secure password storage.
-- **Built-in Storage**: Automatic initialization of `users` and `sessions` databases.
+## ✨ What you get
 
-## Installation
+| | |
+|---|---|
+| 🔐 **Password auth** | Sign up, log in and log out, with passwords hashed using Argon2id. |
+| 🌐 **OAuth2 sign-in** | Connect Google, GitHub or any OAuth2 provider, with a secure server-side flow (`state` check included). |
+| 🛡️ **Route guards** | Mark a route as *Authenticated* or *Requires permission X* in one click. |
+| 🎭 **Roles & permissions** | Define roles, attach permissions, check them anywhere in your logic. |
+| 🍪 **Sessions** | Signed, `httpOnly` cookies, one session per device, logout from one or all devices. |
+| 🗄️ **Ready-made tables** | `Users` and `Sessions` databases are created for you. |
 
-This plugin is designed to be used within a Luna Park project.
+## 🚀 Getting started
 
-```bash
-pnpm add @luna-park/plugin-users
-```
-
-## Quick Start (Default Admin)
-
-Upon mounting, the plugin automatically creates a default administrator account if no user database exists:
-
-- **Login**: `admin`
-- **Password**: `admin`
+1. In Luna Park, open **Library → Install Plugins**, search for **Users** and install it.
+2. The plugin creates a `Users` table, a `Sessions` table and a `User Store`.
+3. A default admin account is seeded: login `admin`, password `admin`.
 
 > [!IMPORTANT]
-> Change the default administrator password immediately after the first login for security.
+> The default admin is only there to get you started. Delete it (or change its password) before going live.
 
-## Visual Scripting Nodes
+## 🛡️ Protecting routes with guards
 
-The plugin adds the following nodes to the Luna Park editor:
+Select a route and open the **Guards** panel in the inspector, then click **+**:
 
-### User
-- `user/connect`: Authenticate a user via login and password. Supports `login`, `signup`, or `both`.
-- `user/disconnect`: Terminate the current session or all active sessions.
+- **Authenticated**: only logged-in users can call the route (otherwise `401`).
+- **Permission**: only users whose roles grant the chosen permission can call it (`401` if anonymous, `403` otherwise).
 
-### OAuth
-- `oauth/connect`: Authenticate via an external OAuth2 provider.
+Routes without guards stay public. Guards run *before* your route logic, both in the editor preview and in the deployed backend.
 
-### Roles & Permissions
-- `roles/has-permission`: Checks if the current user has a specific permission.
-- `roles/assert-permission`: Throws a `Forbidden` error if the user lacks the required permission.
+Every backend route also receives the current user as the `user` input (`id`, `login`, `roles`). Anonymous visitors get the `anonymous` role, so you can even grant permissions to non-logged-in users.
 
-### Hashing
-- `hash/hash-argon2`: Hashes a string using the Argon2id algorithm.
-- `hash/verify-argon2`: Verifies a password against an Argon2 hash.
+## 🧩 Nodes
 
-## Configuration & Settings
+| Node | Side | What it does |
+|---|---|---|
+| `user/connect` | Backend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password. Outputs the connected user. |
+| `user/disconnect` | Backend | Log out from this device (`logout`) or from every device (`all`). |
+| `user/current` | Frontend | Get the user connected in this browser, and whether someone is connected. |
+| `oauth/connect` | Frontend | Open the provider's sign-in popup, then connect the user (`login` / `signup` / `both`). |
+| `roles/has-permission` | Backend | Check if a user has a permission. |
+| `roles/assert-permission` | Backend | Stop with an error if a user lacks a permission. |
+| `hash/hash-argon2` | Backend | Hash any string with Argon2id. |
+| `hash/verify-argon2` | Backend | Check a string against an Argon2 hash. |
 
-The plugin adds two settings tabs to the Luna Park editor:
+## ⚙️ Settings
 
-1.  **General**: Basic user and session configuration.
-2.  **OAuth2**: Manage external authentication providers (Client IDs, Secrets, and Redirect URIs).
+- **General**: choose how users are identified (email or username), and manage **roles** and **permissions** in the Access panel.
+- **OAuth2**: add providers with separate *development* and *production* credentials.
 
-## Database Structure
+For production, set each provider's redirect URI to:
 
-The plugin manages two core file-based databases:
+```
+https://<your-domain>/api/_users/oauth/callback
+```
 
--   **Users**: Stores user profiles, credentials (hashed), and roles.
--   **Sessions**: Manages active user sessions.
+## 📦 In your deployed backend
+
+When you build your project, the plugin wires itself into the generated server:
+
+- **Endpoints**
+  - `GET /api/_users/me` returns the connected user.
+  - `GET /api/_users/oauth/start` and `GET /api/_users/oauth/callback` handle OAuth sign-in.
+- **Secrets stay out of the code**: each provider's client secret is written to the project's `.env` as `USERS_OAUTH_SECRET_<PROVIDER_ID>` and read at runtime.
+- **Runtime**: the logic is imported from `@luna-park/plugin-users/server`, which is added to your backend dependencies automatically.
+
+## 🛠️ Development
+
+```bash
+pnpm install
+pnpm build      # build the plugin
+pnpm dev        # rebuild on change
+pnpm preview    # serve it to the Luna Park editor (http://127.0.0.1:2084)
+```
+
+The package ships two entries:
+
+- `@luna-park/plugin-users`: the editor plugin (settings, nodes, guards).
+- `@luna-park/plugin-users/server`: the framework-agnostic runtime used by the generated backend.
 
 ---
-Developed by [Luna Park](https://luna-park.app).
+
+Made with 💙 by [Luna Park](https://luna-park.app).

@@ -9,8 +9,20 @@ import packageDefinition from "../package.json" with { type: "json" };
 
 export const backImports = [{ name: packageDefinition.name, version: packageDefinition.version }];
 
+function getSecretEnvKey(providerId: string) {
+    return `USERS_OAUTH_SECRET_${ providerId.replaceAll(/[^a-zA-Z0-9]/g, "_").toUpperCase() }`;
+}
+
+export function getEnv({ internals }: TEnv<never, TInternals>) {
+    return Object.fromEntries(Object.values(internals.providers)
+        .map((provider) => [getSecretEnvKey(provider.id), provider.data.production.client.secret]));
+}
+
 export function getInjections({ internals }: TEnv<never, TInternals>) {
-    const providers = Object.fromEntries(Object.values(internals.providers).map((provider) => [provider.id, provider.data.production]));
+    const providers = JSON.stringify(Object.fromEntries(Object.values(internals.providers).map((provider) => {
+        const production = provider.data.production;
+        return [provider.id, { ...production, client: { ...production.client, secret: getSecretEnvKey(provider.id) } }];
+    }))).replaceAll(/"(USERS_OAUTH_SECRET_\w+)"/g, "process.env.$1");
 
     // language=JavaScript
     const serverImport = `
@@ -23,7 +35,7 @@ import { getRequestContext } from "@/context.js";
     const serverBody = `
 const usersTable = ${ JSON.stringify(internals.files["users-db"]) };
 const sessionsTable = ${ JSON.stringify(internals.files["sessions-db"]) };
-const usersProviders = ${ JSON.stringify(providers) };
+const usersProviders = ${ providers };
 const usersCookieOptions = { httpOnly: true, path: "/", sameSite: "strict", secure: true, signed: true };
 
 function getUsersCookie(request, key) {
