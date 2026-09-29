@@ -11,68 +11,83 @@
         <div class="content">
             <LInput
                 v-model="providerData.client.id"
-                borderless
                 label="Client ID"
                 placeholder="abc123"
             />
             <LInput
                 v-model="providerData.client.secret"
-                borderless
                 label="Client secret"
                 placeholder="abc123"
             />
-            <hr>
-            <LInput
-                v-model="providerData.url.authorization"
-                borderless
-                label="Authorization URL"
-                placeholder="https://example.com/oauth2/authorize"
-            />
             <LInput
                 v-model="providerData.url.redirect"
-                borderless
                 label="Redirect URL"
-                placeholder="https://luna-park.app/plugin/@luna-park%2Fuser"
+                :placeholder="redirectPlaceholder"
             />
-            <LInput
-                v-model="providerData.url.token"
-                borderless
-                label="Token URL"
-                placeholder="https://example.com/oauth2/token"
-            />
-            <hr>
-            <LInput
-                v-model="providerData.api.url"
-                borderless
-                label="API target"
-                placeholder="https://example.com/api/me"
-            />
-            <LInput
-                v-model="providerData.api.value"
-                borderless
-                label="API value path"
-                placeholder="mail"
-            />
-            <LInput
-                v-model="providerData.api.id"
-                borderless
-                label="API id path"
-                placeholder="id"
-            />
+            <LButton
+                v-if="collapsible"
+                class="toggle"
+                :icon="showEndpoints ? faChevronUp : faChevronDown"
+                small
+                transparent
+                @click="showEndpoints = !showEndpoints"
+            >
+                {{ showEndpoints ? "Hide" : "Show" }} endpoints
+            </LButton>
+            <template v-if="showEndpoints">
+                <hr>
+                <LInput
+                    v-model="providerData.url.authorization"
+                    label="Authorization URL"
+                    placeholder="https://example.com/oauth2/authorize"
+                />
+                <LInput
+                    v-model="providerData.url.token"
+                    label="Token URL"
+                    placeholder="https://example.com/oauth2/token"
+                />
+                <LInput
+                    v-model="providerData.scope"
+                    label="Scope"
+                    placeholder="openid email profile"
+                />
+                <hr>
+                <LInput
+                    v-model="providerData.api.url"
+                    label="API target"
+                    placeholder="https://example.com/api/me"
+                />
+                <LInput
+                    v-model="providerData.api.value"
+                    label="API value path"
+                    placeholder="mail"
+                />
+                <LInput
+                    v-model="providerData.api.id"
+                    label="API id path"
+                    placeholder="id"
+                />
+            </template>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { LInput } from "@luna-park/design";
+import { faChevronDown, faChevronUp } from "@fortawesome/pro-solid-svg-icons";
+import { LButton, LInput } from "@luna-park/design";
+import { ref } from "vue";
 
 import type { TProviderData } from "@/internals/providers.ts";
 
 const props = defineProps<{
     title: string;
+    collapsible?: boolean;
     description: string;
     providerData: TProviderData;
+    redirectPlaceholder: string;
 }>();
+
+const showEndpoints = ref(!props.collapsible);
 </script>
 
 <style scoped>
@@ -104,6 +119,10 @@ const props = defineProps<{
         display: flex;
         flex-direction: column;
         gap: var(--length-s);
+
+        .toggle {
+            align-self: flex-start;
+        }
 
         hr {
             border: none;

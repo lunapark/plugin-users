@@ -83,6 +83,28 @@ async function createAuthUser(providerId: string, identity: { id: string; value:
     return await db.users.insert({ auth: { [providerId]: identity.id }, login: identity.value, roles: ["user"] });
 }
 
+export function getAuthorizationUrl(provider: TProviderData, state?: string) {
+    const url = new URL(provider.url.authorization);
+    const params: Record<string, string | undefined> = {
+        client_id: provider.client.id,
+        redirect_uri: provider.url.redirect,
+        response_type: "code",
+        scope: provider.scope
+    };
+
+    for (const [key, value] of Object.entries(params)) {
+        if (value && !url.searchParams.has(key)) {
+            url.searchParams.set(key, value);
+        }
+    }
+
+    if (state) {
+        url.searchParams.set("state", state);
+    }
+
+    return url.href;
+}
+
 async function getIdentity(provider: TProviderData, code: string) {
     const tokenResponse = await fetch(provider.url.token, {
         body: new URLSearchParams({
@@ -99,11 +121,16 @@ async function getIdentity(provider: TProviderData, code: string) {
         method: "POST"
     });
 
-    const { access_token } = await tokenResponse.json() as { access_token: string; };
+    const token = await tokenResponse.json() as { access_token?: string; error?: string; error_description?: string; };
+
+    if (!token.access_token) {
+        throw httpError.Unauthorized(`OAuth token exchange failed: ${ token.error_description ?? token.error ?? tokenResponse.status }`);
+    }
 
     const identityResponse = await fetch(provider.api.url, {
         headers: {
-            Authorization: `Bearer ${ access_token }`
+            Accept: "application/json",
+            Authorization: `Bearer ${ token.access_token }`
         },
         method: "GET"
     });

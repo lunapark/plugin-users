@@ -8,6 +8,7 @@ export default tseslint.config(
     ...lpConfigVue,
     {
         rules: {
+            "import-x/no-unresolved": ["error", { ignore: ["^~icons/"] }],
             "sort-keys-custom-order/object-keys": ["error", {
                 orderedKeys: ["id", "name", "title", "index", "type", "start", "end", "input", "inputs", "output", "outputs",
                     "height", "width", "top", "left", "right", "bottom",

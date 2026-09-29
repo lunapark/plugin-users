@@ -5,7 +5,6 @@
                 <LButton
                     v-for="button of buttons"
                     :key="button.panel"
-                    borderless
                     class="button"
                     :icon="button.icon"
                     small

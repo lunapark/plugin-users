@@ -7,13 +7,11 @@
             class="permission"
         >
             <LInput
-                borderless
                 disabled
                 :model-value="permission.label"
                 small
             />
             <LButton
-                borderless
                 :icon="faTrash"
                 small
                 square
@@ -23,12 +21,10 @@
         <div class="permission">
             <LInput
                 v-model="newPermission"
-                borderless
                 placeholder="New Permission..."
                 small
             />
             <LButton
-                borderless
                 :disabled="!newPermission"
                 :icon="faPlus"
                 primary

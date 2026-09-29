@@ -1,7 +1,6 @@
 <template>
     <LCheckbox
         v-model="value"
-        borderless
     />
 </template>
 

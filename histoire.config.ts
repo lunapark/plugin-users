@@ -31,5 +31,6 @@ export default defineConfig({
         server: {
             port: 1980
         }
-    }
+    },
+    viteNodeInlineDeps: [/@luna-park\/design/]
 });

@@ -5,7 +5,6 @@
             <div>
                 <LDropdown
                     v-model="internals.general.identifier"
-                    borderless
                     label="Identifier type"
                     :options="options"
                 />

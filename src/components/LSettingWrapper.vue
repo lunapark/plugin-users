@@ -29,6 +29,7 @@
     .content {
         flex: 1 1 auto;
         overflow-y: auto;
+        background: var(--color-background-0);
     }
 }
 </style>

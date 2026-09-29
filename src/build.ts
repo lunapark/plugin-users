@@ -2,6 +2,7 @@ import type { TEnv } from "@luna-park/plugin";
 import { EInjectionKey } from "@luna-park/plugin";
 
 import type { TInternals } from "@/internals";
+import { resolveProductionData } from "@/internals/providers.ts";
 import { getRolesPermissions } from "@/internals/roles.ts";
 import { serverTarget } from "@/nodes/user.ts";
 
@@ -15,18 +16,18 @@ function getSecretEnvKey(providerId: string) {
 
 export function getEnv({ internals }: TEnv<never, TInternals>) {
     return Object.fromEntries(Object.values(internals.providers)
-        .map((provider) => [getSecretEnvKey(provider.id), provider.data.production.client.secret]));
+        .map((provider) => [getSecretEnvKey(provider.id), resolveProductionData(provider).client.secret]));
 }
 
 export function getInjections({ internals }: TEnv<never, TInternals>) {
     const providers = JSON.stringify(Object.fromEntries(Object.values(internals.providers).map((provider) => {
-        const production = provider.data.production;
+        const production = resolveProductionData(provider);
         return [provider.id, { ...production, client: { ...production.client, secret: getSecretEnvKey(provider.id) } }];
     }))).replaceAll(/"(USERS_OAUTH_SECRET_\w+)"/g, "process.env.$1");
 
     // language=JavaScript
     const serverImport = `
-import { authConnect, configureUsers, generateHexToken, resolveUser } from "${ serverTarget }";
+import { authConnect, configureUsers, generateHexToken, getAuthorizationUrl, resolveUser } from "${ serverTarget }";
 import { dbDelete, dbFind, dbInsert, dbQuerySelect } from "@/database/index.js";
 import { getRequestContext } from "@/context.js";
 `;
@@ -95,9 +96,7 @@ await server.register(async (users) => {
         }
         const state = generateHexToken(16);
         reply.setCookie("users_oauth", JSON.stringify({ mode, provider, state }), { ...usersCookieOptions, maxAge: 600, sameSite: "lax" });
-        const url = new URL(usersProviders[provider].url.authorization);
-        url.searchParams.set("state", state);
-        return reply.redirect(url.href);
+        return reply.redirect(getAuthorizationUrl(usersProviders[provider], state));
     });
 
     users.get("/_users/oauth/callback", async (request, reply) => {

@@ -7,13 +7,11 @@
             class="role"
         >
             <LInput
-                borderless
                 disabled
                 :model-value="role.label"
                 small
             />
             <LButton
-                borderless
                 :disabled="role.freeze"
                 :icon="faTrash"
                 small
@@ -24,12 +22,10 @@
         <div class="role">
             <LInput
                 v-model="newRole"
-                borderless
                 placeholder="New Role..."
                 small
             />
             <LButton
-                borderless
                 :disabled="!newRole"
                 :icon="faPlus"
                 primary

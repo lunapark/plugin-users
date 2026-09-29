@@ -5,28 +5,34 @@
                 <LButton
                     v-for="provider of internals.providers"
                     :key="provider.id"
-                    borderless
                     class="provider"
                     small
-                    :transparent="selectedProviderId !== provider.id"
-                    @click="selectedProviderId = provider.id"
+                    :transparent="picking || selectedProviderId !== provider.id"
+                    @click="selectProvider(provider.id)"
                 >
+                    <LProviderLogo :preset-id="provider.preset" />
                     {{ provider.label }}
                 </LButton>
                 <LButton
+                    border
                     class="button-add"
                     :icon="faPlus"
                     small
-                    transparent
-                    @click="addProvider"
+                    :transparent="!picking"
+                    @click="picking = true"
                 >
                     Add a provider
                 </LButton>
             </div>
         </template>
         <div class="content">
+            <LProviderPicker
+                v-if="picking"
+                @pick="addProvider"
+            />
             <LProviderForm
-                v-if="selectedProvider"
+                v-else-if="selectedProvider"
+                :key="selectedProvider.id"
                 :provider="selectedProvider"
                 @delete="deleteProvider(selectedProvider.id)"
             />
@@ -47,21 +53,30 @@ import { computed, ref } from "vue";
 
 import LSettingWrapper from "@/components/LSettingWrapper.vue";
 import LProviderForm from "@/components/oauth/LProviderForm.vue";
+import LProviderLogo from "@/components/oauth/LProviderLogo.vue";
+import LProviderPicker from "@/components/oauth/LProviderPicker.vue";
 import { internals } from "@/internals";
+import type { TProviderPreset } from "@/internals/presets.ts";
 import { createProvider } from "@/internals/providers.ts";
 
 const selectedProviderId = ref(Object.keys(internals.providers)[0] ?? "");
 const selectedProvider = computed(() => internals.providers[selectedProviderId.value]);
+const picking = ref(!selectedProvider.value);
 
-function addProvider() {
-    const provider = createProvider();
-    provider.data.development.url.redirect = "https://luna-park.app/plugin?plugin=@luna-park/plugin-users&window=OAuth";
+function selectProvider(providerId: string) {
+    selectedProviderId.value = providerId;
+    picking.value = false;
+}
+
+function addProvider(preset?: TProviderPreset) {
+    const provider = createProvider(preset, internals.general.identifier);
     internals.providers[provider.id] = provider;
-    selectedProviderId.value = provider.id;
+    selectProvider(provider.id);
 }
 
 function deleteProvider(providerId: string) {
     delete internals.providers[providerId];
+    picking.value = !Object.keys(internals.providers).length;
 }
 </script>
 
@@ -78,6 +93,7 @@ function deleteProvider(providerId: string) {
         height: 24px;
         display: flex;
         justify-content: flex-start;
+        gap: var(--length-xs);
     }
 
     .button-add {

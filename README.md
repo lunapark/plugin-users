@@ -9,7 +9,7 @@ What you build in the editor preview is exactly what runs once deployed: the sam
 | | |
 |---|---|
 | 🔐 **Password auth** | Sign up, log in and log out, with passwords hashed using Argon2id. |
-| 🌐 **OAuth2 sign-in** | Connect Google, GitHub or any OAuth2 provider, with a secure server-side flow (`state` check included). |
+| 🌐 **OAuth2 sign-in** | One-click presets for Google, Discord, GitHub, Microsoft and GitLab, or any OAuth2 provider, with a secure server-side flow (`state` check included). |
 | 🛡️ **Route guards** | Mark a route as *Authenticated* or *Requires permission X* in one click. |
 | 🎭 **Roles & permissions** | Define roles, attach permissions, check them anywhere in your logic. |
 | 🍪 **Sessions** | Signed, `httpOnly` cookies, one session per device, logout from one or all devices. |
@@ -51,7 +51,13 @@ Every backend route also receives the current user as the `user` input (`id`, `l
 ## ⚙️ Settings
 
 - **General**: choose how users are identified (email or username), and manage **roles** and **permissions** in the Access panel.
-- **OAuth2**: add providers with separate *development* and *production* credentials.
+- **OAuth2**: add providers with separate *development* and *production* credentials. Empty production fields fall back to the development values (except the redirect URL).
+
+### 🌐 OAuth quick setup
+
+Click **Add a provider** and pick a preset: **Google**, **Discord**, **GitHub**, **Microsoft** or **GitLab**. Endpoints, scopes and identity mapping are filled in for you, and a setup guide links to the provider's console and gives the redirect URIs to register. You only paste the client ID and secret.
+
+The authorization URL is completed automatically with `client_id`, `redirect_uri`, `response_type=code` and `scope` (values already in the URL are kept), so a custom provider only needs its base authorize endpoint.
 
 For production, set each provider's redirect URI to:
 

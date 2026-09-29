@@ -1,3 +1,10 @@
+import type { EIdentifierType } from "@/internals/general.ts";
+import type { TProviderPreset } from "@/internals/presets.ts";
+
+export const developmentRedirectUrl = "https://luna-park.app/plugin?plugin=@luna-park/plugin-users&window=OAuth";
+
+export const productionRedirectUrl = "https://<your-domain>/api/_users/oauth/callback";
+
 export type TProviderData = {
     api: {
         id: string;
@@ -8,6 +15,7 @@ export type TProviderData = {
         id: string;
         secret: string;
     };
+    scope?: string;
     url: {
         authorization: string;
         redirect: string;
@@ -15,21 +23,22 @@ export type TProviderData = {
     };
 };
 
-export function createProviderData(): TProviderData {
+export function createProviderData(preset?: TProviderPreset, identifier?: EIdentifierType): TProviderData {
     return {
         api: {
-            id: "",
-            url: "",
-            value: ""
+            id: preset?.api.id ?? "",
+            url: preset?.api.url ?? "",
+            value: (preset && identifier) ? preset.api.value[identifier] : ""
         },
         client: {
             id: "",
             secret: ""
         },
+        scope: preset?.scope ?? "",
         url: {
-            authorization: "",
+            authorization: preset?.url.authorization ?? "",
             redirect: "",
-            token: ""
+            token: preset?.url.token ?? ""
         }
     };
 }
@@ -41,15 +50,43 @@ export type TProvider = {
         production: TProviderData;
     };
     label: string;
+    preset?: string;
 };
 
-export function createProvider(): TProvider {
-    return {
+export function createProvider(preset?: TProviderPreset, identifier?: EIdentifierType): TProvider {
+    const provider: TProvider = {
         id: crypto.randomUUID(),
         data: {
-            development: createProviderData(),
-            production: createProviderData()
+            development: createProviderData(preset, identifier),
+            production: createProviderData(preset, identifier)
         },
-        label: "New provider"
+        label: preset?.label ?? "New provider",
+        preset: preset?.id
+    };
+
+    provider.data.development.url.redirect = developmentRedirectUrl;
+
+    return provider;
+}
+
+export function resolveProductionData(provider: TProvider): TProviderData {
+    const { development, production } = provider.data;
+
+    return {
+        api: {
+            id: production.api.id || development.api.id,
+            url: production.api.url || development.api.url,
+            value: production.api.value || development.api.value
+        },
+        client: {
+            id: production.client.id || development.client.id,
+            secret: production.client.secret || development.client.secret
+        },
+        scope: production.scope || development.scope,
+        url: {
+            authorization: production.url.authorization || development.url.authorization,
+            redirect: production.url.redirect,
+            token: production.url.token || development.url.token
+        }
     };
 }

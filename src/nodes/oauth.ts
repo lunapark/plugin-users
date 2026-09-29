@@ -2,7 +2,7 @@ import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
 import { internals } from "@/internals";
 import type { TConnectMode } from "@/runtime/connect.ts";
-import { authConnect } from "@/runtime/connect.ts";
+import { authConnect, getAuthorizationUrl } from "@/runtime/connect.ts";
 
 export default [
     makeLogicNode({
@@ -31,9 +31,10 @@ export default [
         },
         methods: {
             async in_exec() {
-                const target = internals.providers[this.in_provider]?.data.development.url.authorization;
+                const provider = internals.providers[this.in_provider]?.data.development;
 
-                if (target) {
+                if (provider?.url.authorization) {
+                    const target = getAuthorizationUrl(provider);
                     const listener = async (event: MessageEvent) => {
                         if (event.data.code) {
                             window.removeEventListener("message", listener);
