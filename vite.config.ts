@@ -11,8 +11,10 @@ export default defineConfig(() => {
         build: {
             lib: {
                 name: "@luna-park/plugin-users",
-                entry: "src/index.ts",
-                fileName: "index",
+                entry: {
+                    index: "src/index.ts",
+                    server: "src/server.ts"
+                },
                 formats: ["es"]
             },
             rolldownOptions: {
@@ -21,7 +23,7 @@ export default defineConfig(() => {
         },
         plugins: [
             vue(),
-            cssInjectedByJsPlugin()
+            cssInjectedByJsPlugin({ jsAssetsFilterFunction: (chunk) => chunk.fileName === "index.js" })
         ],
         preview: {
             allowedHosts: [

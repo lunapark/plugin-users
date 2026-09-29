@@ -1,7 +1,8 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
 import { internals } from "@/internals";
-import { authConnect } from "@/logic/connect.ts";
+import type { TConnectMode } from "@/runtime/connect.ts";
+import { authConnect } from "@/runtime/connect.ts";
 
 export default [
     makeLogicNode({
@@ -20,7 +21,8 @@ export default [
             /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
-            out_exec: LogicType.exec()
+            out_exec: LogicType.exec(),
+            out_connected: LogicType.boolean({ name: "connected" })
         },
         display: {
             config: {
@@ -35,7 +37,8 @@ export default [
                     const listener = async (event: MessageEvent) => {
                         if (event.data.code) {
                             window.removeEventListener("message", listener);
-                            await authConnect(this.in_provider, event.data.code, this.in_mode);
+                            await authConnect(this.in_provider, event.data.code, this.in_mode as TConnectMode);
+                            this.out_connected = true;
                             await this.out_exec();
                         }
                     };
@@ -46,6 +49,34 @@ export default [
                     childWindow!.addEventListener("beforeunload", () => window.removeEventListener("message", listener));
                 }
             }
+        },
+        build: {
+            generate: () => `async function () {
+                const url = new URL(new URL(import.meta.env.VITE_BACKEND_URL, window.location.origin).href + "/_users/oauth/start");
+                url.searchParams.set("provider", this.in_provider);
+                url.searchParams.set("mode", this.in_mode);
+                const status = await new Promise((resolve) => {
+                    const popup = window.open(url.href, "_blank", "width=400,height=600");
+                    const listener = (event) => {
+                        if (event.data?.oauth) {
+                            finish(event.data.oauth);
+                        }
+                    };
+                    const interval = setInterval(() => {
+                        if (!popup || popup.closed) {
+                            finish("closed");
+                        }
+                    }, 500);
+                    function finish(result) {
+                        clearInterval(interval);
+                        window.removeEventListener("message", listener);
+                        resolve(result);
+                    }
+                    window.addEventListener("message", listener);
+                });
+                this.out_connected = status === "connected";
+                await this.out_exec();
+            }`
         }
     })
 ];

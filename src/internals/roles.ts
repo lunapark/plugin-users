@@ -14,6 +14,10 @@ export function createRole(role: Partial<TRole> = {}): TRole {
     };
 }
 
+export function getRolesPermissions(roles: Record<string, TRole>) {
+    return Object.fromEntries(Object.values(roles).map((role) => [role.id, role.permissions]));
+}
+
 export type TPermission = {
     id: string;
     label: string;

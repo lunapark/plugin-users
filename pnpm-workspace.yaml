@@ -2,6 +2,8 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
   vue-demi: true
+minimumReleaseAgeExclude:
+  - '@luna-park/plugin@1.5.0'
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver

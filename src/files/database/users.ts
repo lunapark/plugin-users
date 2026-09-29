@@ -1,9 +1,9 @@
 import type { Static, TFileDatabase } from "@luna-park/plugin";
 import { EElementType, LogicType } from "@luna-park/plugin";
-import { argon2id } from "hash-wasm";
 
 import { database, env } from "@/env.ts";
 import { internals } from "@/internals";
+import { hashPassword } from "@/runtime/hash.ts";
 
 export async function initUsersDatabase() {
     if (!internals.files["users-db"] || !env.getFile(internals.files["users-db"])) {
@@ -15,12 +15,7 @@ export async function initUsersDatabase() {
 }
 
 async function getUsersDatabase() {
-    const password = "admin";
-
-    const salt = new Uint8Array(64);
-    crypto.getRandomValues(salt);
-
-    const passwordHash = await argon2id({ hashLength: 64, iterations: 256, memorySize: 2048, outputType: "encoded", parallelism: 1, password, salt });
+    const passwordHash = await hashPassword("admin");
     const currentDate = new Date().toISOString();
 
     return {

@@ -1,5 +1,7 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
-import { argon2id, argon2Verify } from "hash-wasm";
+
+import { serverTarget } from "@/nodes/user.ts";
+import { hashPassword, verifyPassword } from "@/runtime/hash.ts";
 
 export default [
     makeLogicNode({
@@ -25,20 +27,21 @@ export default [
         },
         methods: {
             async in_exec() {
-                const salt = new Uint8Array(64);
-                crypto.getRandomValues(salt);
-
-                this.out_hash = await argon2id({
-                    hashLength: this.config.hashLength,
-                    iterations: this.config.iterations,
-                    memorySize: this.config.memory,
-                    outputType: "encoded",
-                    parallelism: this.config.parallelism,
-                    password: this.in_password,
-                    salt
-                });
+                this.out_hash = await hashPassword(this.in_password, this.config);
                 await this.out_exec();
             }
+        },
+        build: {
+            generate: ({ config }) => `async function () {
+                this.out_hash = await hashPassword(this.in_password, ${ JSON.stringify({
+                    hashLength: config?.hashLength ?? 64,
+                    iterations: config?.iterations ?? 256,
+                    memory: config?.memory ?? 2048,
+                    parallelism: config?.parallelism ?? 1
+                }) });
+                await this.out_exec();
+            }`,
+            imports: [{ name: "hashPassword", target: serverTarget }]
         }
     }),
     makeLogicNode({
@@ -61,15 +64,16 @@ export default [
         },
         methods: {
             async in_exec() {
-                const salt = new Uint8Array(64);
-                crypto.getRandomValues(salt);
-
-                this.out_verified = await argon2Verify({
-                    hash: this.in_hash,
-                    password: this.in_password
-                });
+                this.out_verified = await verifyPassword(this.in_password, this.in_hash);
                 await this.out_exec();
             }
+        },
+        build: {
+            generate: () => `async function () {
+                this.out_verified = await verifyPassword(this.in_password, this.in_hash);
+                await this.out_exec();
+            }`,
+            imports: [{ name: "verifyPassword", target: serverTarget }]
         }
     })
 ];
