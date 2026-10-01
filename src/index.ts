@@ -10,12 +10,13 @@ import { configureEditorRuntime } from "@/editor/runtime.ts";
 import { env } from "@/env.ts";
 import { initSessionsDatabase } from "@/files/database/sessions.ts";
 import { initUsersDatabase } from "@/files/database/users.ts";
-import { initUserStore } from "@/files/store/user.ts";
+import { initUserStore, setUserStore } from "@/files/store/user.ts";
 import { getGuards } from "@/guards.ts";
 import { hooks } from "@/hooks";
 import { initGeneralSettings, internals } from "@/internals";
 import icon from "@/logo.svg";
 import { getNodes } from "@/nodes";
+import { resolveUser } from "@/runtime/session.ts";
 
 export default makePlugin({
     id: "users",
@@ -47,6 +48,7 @@ export default makePlugin({
             await initSessionsDatabase();
             await initUserStore();
             configureEditorRuntime();
+            setUserStore(await resolveUser());
         }
     },
     settings: [

@@ -3,12 +3,23 @@ import { EElementType, LogicType } from "@luna-park/plugin";
 
 import { env } from "@/env.ts";
 import { internals } from "@/internals";
+import type { TPublicUser } from "@/runtime/config.ts";
 
 export async function initUserStore() {
     if (!internals.files["user-store"] || !env.getFile(internals.files["user-store"])) {
         const file = env.addFile(await getUserStore());
         internals.files["user-store"] = file.id;
     }
+}
+
+export function setUserStore(user: TPublicUser) {
+    const store = env.getFile(internals.files["user-store"]!) as TFileStore;
+    store.value.isConnected = !!user.id;
+    store.value.user = user;
+}
+
+export function generateUserStoreUpdate(storeId: string, user: string) {
+    return `[[file:${ storeId }]].value = { isConnected: !!${ user }.id, user: ${ user } };`;
 }
 
 async function getUserStore() {

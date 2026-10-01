@@ -13,8 +13,8 @@ export function getNodes({ internals }: TEnv<never, TInternals>) {
     return [
         ...hashNodes,
         ...rolesNodes,
-        ...oauthNodes,
-        ...userNodes,
+        ...oauthNodes(internals.files["user-store"]),
+        ...userNodes(internals.files["user-store"]),
         ...passwordNodes(internals.general.password ?? getDefaultPasswordPolicy()),
         ...sessionsNodes
     ];

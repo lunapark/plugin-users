@@ -1,15 +1,16 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
+import { generateUserStoreUpdate, setUserStore } from "@/files/store/user.ts";
 import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
 import { deleteUser } from "@/runtime/account.ts";
 import type { TConnectMode } from "@/runtime/connect.ts";
 import { passwordConnect } from "@/runtime/connect.ts";
-import { connectUser, disconnect, disconnectUser, resolveUser } from "@/runtime/session.ts";
+import { anonymousUser, connectUser, disconnect, disconnectUser, resolveUser } from "@/runtime/session.ts";
 
 export const serverTarget = "@luna-park/plugin-users/server";
 export const sharedTarget = "@luna-park/plugin-users/shared";
 
-export default [
+export default (storeId: string) => [
     makeLogicNode({
         name: "user/connect",
         inputs: {
@@ -32,6 +33,7 @@ export default [
         methods: {
             async in_exec() {
                 this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
+                setUserStore(this.out_user);
                 await this.out_exec();
             }
         },
@@ -42,6 +44,7 @@ export default [
                     throw new Error(user?.message ?? "Connection failed.");
                 }
                 this.out_user = user;
+                ${ generateUserStoreUpdate(storeId, "user") }
                 await this.out_exec();
             }`,
             imports: [{ name: "route", target: "@/utils/api" }]
@@ -64,12 +67,14 @@ export default [
         methods: {
             async in_exec() {
                 await disconnect(this.in_mode as "logout" | "all");
+                setUserStore(anonymousUser);
                 await this.out_exec();
             }
         },
         build: {
             generate: () => `async function () {
                 await route({ method: "post", url: "/_users/disconnect" }, { body: { mode: this.in_mode } });
+                ${ generateUserStoreUpdate(storeId, JSON.stringify(anonymousUser)) }
                 await this.out_exec();
             }`,
             imports: [{ name: "route", target: "@/utils/api" }]
@@ -160,6 +165,7 @@ export default [
             async in_exec() {
                 this.out_user = await resolveUser();
                 this.out_connected = !!this.out_user.id;
+                setUserStore(this.out_user);
                 await this.out_exec();
             }
         },
@@ -167,6 +173,7 @@ export default [
             generate: () => `async function () {
                 this.out_user = await route({ method: "get", url: "/_users/me" });
                 this.out_connected = !!this.out_user.id;
+                ${ generateUserStoreUpdate(storeId, "this.out_user") }
                 await this.out_exec();
             }`,
             imports: [{ name: "route", target: "@/utils/api" }]

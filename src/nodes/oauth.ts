@@ -1,5 +1,6 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
+import { generateUserStoreUpdate, setUserStore } from "@/files/store/user.ts";
 import { internals } from "@/internals";
 import type { TConnectMode } from "@/runtime/connect.ts";
 import { authConnect, authLink, getAuthorizationUrl } from "@/runtime/connect.ts";
@@ -51,16 +52,7 @@ async function requestOAuthCode(providerId: string) {
     return await waitForOAuthCode(getAuthorizationUrl(provider, state), state);
 }
 
-async function runOAuthTask(code: string | undefined, task: (code: string) => Promise<unknown>) {
-    if (!code) {
-        return false;
-    }
-
-    await task(code);
-    return true;
-}
-
-function generateOAuthPopup(mode: string, output: string) {
+function generateOAuthPopup(mode: string, output: string, onConnected = "") {
     return `async function () {
                 const backend = new URL(import.meta.env.VITE_BACKEND_URL, window.location.origin);
                 const url = new URL(backend.pathname.endsWith("/") ? "_users/oauth/start" : backend.pathname + "/_users/oauth/start", backend);
@@ -90,11 +82,14 @@ function generateOAuthPopup(mode: string, output: string) {
                     throw new Error(result.message ?? "OAuth connection failed.");
                 }
                 this.${ output } = result.oauth === "connected";
+                if (this.${ output }) {
+                    ${ onConnected }
+                }
                 await this.out_exec();
             }`;
 }
 
-export default [
+export default (storeId: string) => [
     makeLogicNode({
         name: "oauth/connect",
         inputs: {
@@ -108,6 +103,9 @@ export default [
             out_exec: LogicType.exec(),
             out_connected: LogicType.boolean({ name: "connected" })
         },
+        build: {
+            generate: () => generateOAuthPopup("this.in_mode", "out_connected", generateUserStoreUpdate(storeId, "result.user"))
+        },
         display: {
             config: {
                 scope: ELogicScope.Frontend
@@ -116,12 +114,12 @@ export default [
         methods: {
             async in_exec() {
                 const code = await requestOAuthCode(this.in_provider);
-                this.out_connected = await runOAuthTask(code, (code) => authConnect(this.in_provider, code, this.in_mode as TConnectMode));
+                if (code) {
+                    setUserStore(await authConnect(this.in_provider, code, this.in_mode as TConnectMode));
+                }
+                this.out_connected = !!code;
                 await this.out_exec();
             }
-        },
-        build: {
-            generate: () => generateOAuthPopup("this.in_mode", "out_connected")
         }
     }),
     makeLogicNode({
@@ -133,6 +131,9 @@ export default [
         outputs: {
             out_exec: LogicType.exec(),
             out_linked: LogicType.boolean({ name: "linked" })
+        },
+        build: {
+            generate: () => generateOAuthPopup("\"link\"", "out_linked")
         },
         display: {
             config: {
@@ -146,12 +147,12 @@ export default [
             async in_exec() {
                 const session = await requireCurrentSession();
                 const code = await requestOAuthCode(this.in_provider);
-                this.out_linked = await runOAuthTask(code, (code) => authLink(this.in_provider, code, session.user));
+                if (code) {
+                    await authLink(this.in_provider, code, session.user);
+                }
+                this.out_linked = !!code;
                 await this.out_exec();
             }
-        },
-        build: {
-            generate: () => generateOAuthPopup("\"link\"", "out_linked")
         }
     })
 ];

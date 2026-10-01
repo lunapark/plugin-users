@@ -1,6 +1,7 @@
 import type { TEnv } from "@luna-park/plugin";
 import { EInjectionKey } from "@luna-park/plugin";
 
+import { generateUserStoreUpdate } from "@/files/store/user.ts";
 import type { TInternals } from "@/internals";
 import { getDefaultPasswordPolicy } from "@/internals/general.ts";
 import { resolveProductionData } from "@/internals/providers.ts";
@@ -133,13 +134,10 @@ await server.register(async (users) => {
         let result = { message: "Invalid OAuth state.", oauth: "error" };
         if (state === request.query.state && request.query.code) {
             try {
-                if (mode === "link") {
-                    await authLink(provider, request.query.code, user);
-                }
-                else {
-                    await authConnect(provider, request.query.code, mode);
-                }
-                result = { oauth: "connected" };
+                const connected = mode === "link"
+                    ? await authLink(provider, request.query.code, user)
+                    : await authConnect(provider, request.query.code, mode);
+                result = { oauth: "connected", user: connected };
             }
             catch (error) {
                 console.error(error);
@@ -151,7 +149,16 @@ await server.register(async (users) => {
 }, { prefix: serverConfig.prefix });
 `;
 
+    // language=JavaScript
+    const appSetup = `
+import { route as usersRoute } from "@/utils/api";
+usersRoute({ method: "get", url: "/_users/me" }).then((user) => {
+    ${ generateUserStoreUpdate(internals.files["user-store"], "user") }
+});
+`;
+
     return {
+        [EInjectionKey.AppSetup]: appSetup,
         [EInjectionKey.ServerImport]: serverImport,
         [EInjectionKey.ServerBody]: serverBody
     };
