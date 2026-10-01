@@ -39,11 +39,12 @@ Every backend route also receives the current user as the `user` input (`id`, `l
 
 | Node | Side | What it does |
 |---|---|---|
-| `user/connect` | Frontend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password, through the `/_users/connect` route. Outputs whether it succeeded and the connected user. |
+| `user/connect` | Frontend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password, through the `/_users/connect` route. Outputs the connected user, and throws on failure (wrap it in `error/try` to handle it). |
 | `user/disconnect` | Frontend | Log out from this device (`logout`) or from every device (`all`), through the `/_users/disconnect` route. |
 | `user/connect-by-id` | Backend | Connect the caller as any user, without a password (impersonation, magic links...). Guard the route. |
 | `user/disconnect-by-id` | Backend | Log out every session of any user. Guard the route. |
 | `user/current` | Frontend | Get the user connected in this browser, and whether someone is connected. |
+| `user/check-password` | Shared | Check a password against the password policy from the settings. Outputs whether it is valid and, if not, why (e.g. to give feedback on a sign-up form). |
 | `user/change-password` | Backend | Change the connected user's password (current password required) and log out their other devices. |
 | `user/request-password-reset` | Backend | Create a one-hour, single-use reset token for a login. Send it to the user yourself (by email, for example). |
 | `user/reset-password` | Backend | Set a new password from a reset token and log out every device. |
@@ -60,7 +61,7 @@ Every backend route also receives the current user as the `user` input (`id`, `l
 
 ## ⚙️ Settings
 
-- **General**: choose how users are identified (email or username), and manage **roles** and **permissions** in the Access panel.
+- **General**: choose how users are identified (username or email), set the password policy (minimum length and required character types), and manage **roles** and **permissions** in the Access panel.
 - **OAuth2**: add providers with separate *development* and *production* credentials. Empty production fields fall back to the development values (except the redirect URL).
 
 ### 🌐 OAuth quick setup

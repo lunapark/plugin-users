@@ -14,6 +14,9 @@ export function configureEditorRuntime() {
             get identifier() {
                 return internals.general.identifier;
             },
+            get password() {
+                return internals.general.password;
+            },
             get providers() {
                 return Object.fromEntries(Object.values(internals.providers).map((provider) => [provider.id, provider.data.development]));
             },

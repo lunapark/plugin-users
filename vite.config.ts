@@ -14,7 +14,8 @@ export default defineConfig(() => {
                 name: "@luna-park/plugin-users",
                 entry: {
                     index: "src/index.ts",
-                    server: "src/server.ts"
+                    server: "src/server.ts",
+                    shared: "src/shared.ts"
                 },
                 formats: ["es"]
             },

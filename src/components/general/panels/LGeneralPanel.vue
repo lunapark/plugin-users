@@ -6,7 +6,7 @@
                 <LDropdown
                     label="Identifier type"
                     :model-value="internals.general.identifier"
-                    :options="options"
+                    :options="identifierOptions"
                     @update:model-value="setIdentifier($event as EIdentifierType)"
                 />
                 <span class="description">
@@ -14,19 +14,50 @@
                 </span>
             </div>
         </section>
+        <h2>Password</h2>
+        <section>
+            <div>
+                <LInput
+                    v-model="internals.general.password.minLength"
+                    label="Minimum length"
+                    :options="{ clamp: true, min: 1, step: 1 }"
+                    type="number"
+                />
+                <span class="description">
+                    The minimum number of characters a password must contain.
+                </span>
+            </div>
+            <div>
+                <LDropdown
+                    v-model="internals.general.password.strength"
+                    label="Strength"
+                    :options="strengthOptions"
+                />
+                <span class="description">
+                    The kinds of characters a password must contain.
+                </span>
+            </div>
+        </section>
     </LPanelWrapper>
 </template>
 
 <script setup lang="ts">
-import { LDropdown } from "@luna-park/design";
+import { LDropdown, LInput } from "@luna-park/design";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
 import { internals, setIdentifier } from "@/internals";
-import { EIdentifierType } from "@/internals/general.ts";
+import { EIdentifierType, EPasswordStrength } from "@/internals/general.ts";
 
-const options = [
+const identifierOptions = [
     { id: EIdentifierType.email, label: "Email" },
     { id: EIdentifierType.username, label: "Username" }
+];
+
+const strengthOptions = [
+    { id: EPasswordStrength.any, label: "Any characters" },
+    { id: EPasswordStrength.alphanumeric, label: "Letters and numbers" },
+    { id: EPasswordStrength.mixedCase, label: "Upper and lower case letters, and numbers" },
+    { id: EPasswordStrength.special, label: "Upper and lower case letters, numbers, and special characters" }
 ];
 </script>
 

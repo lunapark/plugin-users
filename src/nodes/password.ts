@@ -1,10 +1,48 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
 import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
-import { serverTarget } from "@/nodes/user.ts";
+import { internals } from "@/internals";
+import type { TPasswordPolicy } from "@/internals/general.ts";
+import { serverTarget, sharedTarget } from "@/nodes/user.ts";
 import { changePassword, createPasswordResetToken, resetPassword } from "@/runtime/account.ts";
+import { getPasswordError } from "@/runtime/password.ts";
 
-export default [
+export default (policy: TPasswordPolicy) => [
+    makeLogicNode({
+        name: "user/check-password",
+        inputs: {
+            in_exec: LogicType.exec(),
+            in_password: LogicType.string({ name: "Password" })
+        },
+        outputs: {
+            out_exec: LogicType.exec(),
+            out_valid: LogicType.boolean({ name: "valid" }),
+            out_error: LogicType.string({ name: "error" })
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Shared
+            }
+        },
+        documentation: {
+            description: "Check a password against the password policy set in the Users settings. Outputs the reason when it is not strong enough."
+        },
+        methods: {
+            async in_exec() {
+                this.out_error = getPasswordError(this.in_password, internals.general.password);
+                this.out_valid = !this.out_error;
+                await this.out_exec();
+            }
+        },
+        build: {
+            generate: () => `async function () {
+                this.out_error = getPasswordError(this.in_password, ${ JSON.stringify(policy) });
+                this.out_valid = !this.out_error;
+                await this.out_exec();
+            }`,
+            imports: [{ name: "getPasswordError", target: sharedTarget }]
+        }
+    }),
     makeLogicNode({
         name: "user/change-password",
         inputs: {

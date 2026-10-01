@@ -4,9 +4,10 @@ import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
 import { deleteUser } from "@/runtime/account.ts";
 import type { TConnectMode } from "@/runtime/connect.ts";
 import { passwordConnect } from "@/runtime/connect.ts";
-import { anonymousUser, connectUser, disconnect, disconnectUser, resolveUser } from "@/runtime/session.ts";
+import { connectUser, disconnect, disconnectUser, resolveUser } from "@/runtime/session.ts";
 
 export const serverTarget = "@luna-park/plugin-users/server";
+export const sharedTarget = "@luna-park/plugin-users/shared";
 
 export default [
     makeLogicNode({
@@ -21,7 +22,6 @@ export default [
         },
         outputs: {
             out_exec: LogicType.exec(),
-            out_connected: LogicType.boolean({ name: "connected" }),
             out_user: middlewareUserSchema
         },
         display: {
@@ -31,22 +31,17 @@ export default [
         },
         methods: {
             async in_exec() {
-                try {
-                    this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
-                }
-                catch (error) {
-                    console.error(error);
-                    this.out_user = anonymousUser;
-                }
-                this.out_connected = !!this.out_user.id;
+                this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
                 await this.out_exec();
             }
         },
         build: {
             generate: () => `async function () {
                 const user = await route({ method: "post", url: "/_users/connect" }, { body: { login: this.in_login, mode: this.in_mode, password: this.in_password } });
-                this.out_connected = !!user?.id;
-                this.out_user = this.out_connected ? user : ${ JSON.stringify(anonymousUser) };
+                if (!user?.id) {
+                    throw new Error(user?.message ?? "Connection failed.");
+                }
+                this.out_user = user;
                 await this.out_exec();
             }`,
             imports: [{ name: "route", target: "@/utils/api" }]

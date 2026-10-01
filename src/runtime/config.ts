@@ -1,4 +1,4 @@
-import type { EIdentifierType } from "@/internals/general.ts";
+import type { EIdentifierType, TPasswordPolicy } from "@/internals/general.ts";
 import type { TProviderData } from "@/internals/providers.ts";
 
 export type TUserRecord = {
@@ -29,6 +29,7 @@ type TTable<TRecord> = {
 export type TUsersRuntimeOptions = {
     config: {
         identifier: EIdentifierType;
+        password: TPasswordPolicy;
         providers: Record<string, TProviderData>;
         roles: Record<string, Array<string>>;
     };

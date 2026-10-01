@@ -2,6 +2,7 @@ import type { TEnv } from "@luna-park/plugin";
 import { EInjectionKey } from "@luna-park/plugin";
 
 import type { TInternals } from "@/internals";
+import { getDefaultPasswordPolicy } from "@/internals/general.ts";
 import { resolveProductionData } from "@/internals/providers.ts";
 import { getRolesPermissions } from "@/internals/roles.ts";
 import { serverTarget } from "@/nodes/user.ts";
@@ -9,6 +10,7 @@ import { serverTarget } from "@/nodes/user.ts";
 import packageDefinition from "../package.json" with { type: "json" };
 
 export const backImports = [{ name: packageDefinition.name, version: packageDefinition.version }];
+export const frontImports = backImports;
 
 function getSecretEnvKey(providerId: string) {
     return `USERS_OAUTH_SECRET_${ providerId.replaceAll(/[^a-zA-Z0-9]/g, "_").toUpperCase() }`;
@@ -51,6 +53,7 @@ function getUsersCookie(request, key) {
 configureUsers({
     config: {
         identifier: ${ JSON.stringify(internals.general.identifier) },
+        password: ${ JSON.stringify(internals.general.password ?? getDefaultPasswordPolicy()) },
         providers: usersProviders,
         roles: ${ JSON.stringify(getRolesPermissions(internals.roles)) }
     },
@@ -127,7 +130,7 @@ await server.register(async (users) => {
             return reply.code(400).type("text/html").send("OAuth session expired. Please try again.");
         }
         const { mode, origin, provider, state, user } = JSON.parse(saved);
-        let status = "error";
+        let result = { message: "Invalid OAuth state.", oauth: "error" };
         if (state === request.query.state && request.query.code) {
             try {
                 if (mode === "link") {
@@ -136,13 +139,14 @@ await server.register(async (users) => {
                 else {
                     await authConnect(provider, request.query.code, mode);
                 }
-                status = "connected";
+                result = { oauth: "connected" };
             }
             catch (error) {
                 console.error(error);
+                result = { message: error.message, oauth: "error" };
             }
         }
-        return reply.type("text/html").send(\`<script>window.opener?.postMessage({ oauth: \${ JSON.stringify(status) } }, \${ JSON.stringify(origin) });window.close();</script>\`);
+        return reply.type("text/html").send(\`<script>window.opener?.postMessage(\${ JSON.stringify(result).replaceAll("<", "\\\\u003c") }, \${ JSON.stringify(origin) });window.close();</script>\`);
     });
 }, { prefix: serverConfig.prefix });
 `;

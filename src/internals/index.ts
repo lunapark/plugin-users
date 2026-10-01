@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 
 import type { TGeneralSettings } from "@/internals/general.ts";
-import { EIdentifierType } from "@/internals/general.ts";
+import { EIdentifierType, getDefaultPasswordPolicy } from "@/internals/general.ts";
 import { getProviderPreset } from "@/internals/presets.ts";
 import type { TProvider } from "@/internals/providers.ts";
 import type { TPermission, TRole } from "@/internals/roles.ts";
@@ -18,7 +18,8 @@ export type TInternals = {
 export const internals = reactive<TInternals>({
     files: {},
     general: {
-        identifier: EIdentifierType.email
+        identifier: EIdentifierType.username,
+        password: getDefaultPasswordPolicy()
     },
     permissions: {},
     providers: {},
@@ -60,6 +61,10 @@ export function setIdentifier(identifier: EIdentifierType) {
             }
         }
     }
+}
+
+export function initGeneralSettings() {
+    internals.general.password ??= getDefaultPasswordPolicy();
 }
 
 function initInternals() {

@@ -56,14 +56,8 @@ async function runOAuthTask(code: string | undefined, task: (code: string) => Pr
         return false;
     }
 
-    try {
-        await task(code);
-        return true;
-    }
-    catch (error) {
-        console.error(error);
-        return false;
-    }
+    await task(code);
+    return true;
 }
 
 function generateOAuthPopup(mode: string, output: string) {
@@ -73,16 +67,16 @@ function generateOAuthPopup(mode: string, output: string) {
                 url.searchParams.set("provider", this.in_provider);
                 url.searchParams.set("mode", ${ mode });
                 url.searchParams.set("origin", window.location.origin);
-                const status = await new Promise((resolve) => {
+                const result = await new Promise((resolve) => {
                     const popup = window.open(url.href, "_blank", "width=400,height=600");
                     const listener = (event) => {
                         if (event.origin === url.origin && event.source === popup && event.data?.oauth) {
-                            finish(event.data.oauth);
+                            finish(event.data);
                         }
                     };
                     const interval = setInterval(() => {
                         if (!popup || popup.closed) {
-                            finish("closed");
+                            finish({ oauth: "closed" });
                         }
                     }, 500);
                     function finish(result) {
@@ -92,7 +86,10 @@ function generateOAuthPopup(mode: string, output: string) {
                     }
                     window.addEventListener("message", listener);
                 });
-                this.${ output } = status === "connected";
+                if (result.oauth === "error") {
+                    throw new Error(result.message ?? "OAuth connection failed.");
+                }
+                this.${ output } = result.oauth === "connected";
                 await this.out_exec();
             }`;
 }

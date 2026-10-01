@@ -2,8 +2,7 @@ import { httpError } from "@luna-park/http-errors";
 
 import { EIdentifierType } from "@/internals/general.ts";
 import { getRuntime } from "@/runtime/config.ts";
-
-const minPasswordLength = 8;
+import { getPasswordError } from "@/runtime/password.ts";
 
 export function assertValidLogin(login: string) {
     const { config } = getRuntime();
@@ -18,7 +17,9 @@ export function assertValidLogin(login: string) {
 }
 
 export function assertValidPassword(password: string) {
-    if (password.length < minPasswordLength) {
-        throw httpError.BadRequest(`Password must be at least ${ minPasswordLength } characters long.`);
+    const error = getPasswordError(password, getRuntime().config.password);
+
+    if (error) {
+        throw httpError.BadRequest(error);
     }
 }

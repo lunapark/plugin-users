@@ -2,7 +2,7 @@ import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
 import { makePlugin } from "@luna-park/plugin";
 import { shallowRef } from "vue";
 
-import { backImports, getEnv, getInjections } from "@/build.ts";
+import { backImports, frontImports, getEnv, getInjections } from "@/build.ts";
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
 import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
 import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
@@ -13,9 +13,9 @@ import { initUsersDatabase } from "@/files/database/users.ts";
 import { initUserStore } from "@/files/store/user.ts";
 import { getGuards } from "@/guards.ts";
 import { hooks } from "@/hooks";
-import { internals } from "@/internals";
+import { initGeneralSettings, internals } from "@/internals";
 import icon from "@/logo.svg";
-import { nodes } from "@/nodes";
+import { getNodes } from "@/nodes";
 
 export default makePlugin({
     id: "users",
@@ -23,12 +23,13 @@ export default makePlugin({
     description: "Add user accounts, connections, and roles.",
     build: {
         backImports,
+        frontImports,
         env: getEnv,
         injections: getInjections
     },
     editor: {
         guards: getGuards,
-        nodes
+        nodes: getNodes
     },
     hooks,
     icon,
@@ -39,6 +40,8 @@ export default makePlugin({
             env.getFile = getFile;
             env.app = app;
             env.backend = backend;
+
+            initGeneralSettings();
 
             await initUsersDatabase();
             await initSessionsDatabase();
