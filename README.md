@@ -39,8 +39,10 @@ Every backend route also receives the current user as the `user` input (`id`, `l
 
 | Node | Side | What it does |
 |---|---|---|
-| `user/connect` | Backend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password. Outputs the connected user. |
-| `user/disconnect` | Backend | Log out from this device (`logout`) or from every device (`all`). |
+| `user/connect` | Frontend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password, through the `/_users/connect` route. Outputs whether it succeeded and the connected user. |
+| `user/disconnect` | Frontend | Log out from this device (`logout`) or from every device (`all`), through the `/_users/disconnect` route. |
+| `user/connect-by-id` | Backend | Connect the caller as any user, without a password (impersonation, magic links...). Guard the route. |
+| `user/disconnect-by-id` | Backend | Log out every session of any user. Guard the route. |
 | `user/current` | Frontend | Get the user connected in this browser, and whether someone is connected. |
 | `user/change-password` | Backend | Change the connected user's password (current password required) and log out their other devices. |
 | `user/request-password-reset` | Backend | Create a one-hour, single-use reset token for a login. Send it to the user yourself (by email, for example). |

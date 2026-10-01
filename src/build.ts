@@ -27,7 +27,7 @@ export function getInjections({ internals }: TEnv<never, TInternals>) {
 
     // language=JavaScript
     const serverImport = `
-import { authConnect, authLink, configureUsers, generateHexToken, getAuthorizationUrl, resolveUser } from "${ serverTarget }";
+import { authConnect, authLink, configureUsers, disconnect, generateHexToken, getAuthorizationUrl, passwordConnect, resolveUser } from "${ serverTarget }";
 import { dbDelete, dbFind, dbInsert, dbQuerySelect, dbUpdate } from "@/database/index.js";
 import { getRequestContext } from "@/context.js";
 `;
@@ -92,6 +92,19 @@ server.addHook("preHandler", async (request) => {
 
 await server.register(async (users) => {
     users.get("/_users/me", async (request) => request.context.in_user);
+
+    users.post("/_users/connect", async (request, reply) => {
+        const { login, mode, password } = request.body ?? {};
+        if (typeof login !== "string" || typeof password !== "string" || !["login", "signup", "both"].includes(mode)) {
+            return reply.code(400).send({ message: "Invalid login, password or mode." });
+        }
+        return await passwordConnect(login, password, mode);
+    });
+
+    users.post("/_users/disconnect", async (request) => {
+        await disconnect(request.body?.mode === "all" ? "all" : "logout");
+        return {};
+    });
 
     users.get("/_users/oauth/start", async (request, reply) => {
         const { mode, origin, provider } = request.query;

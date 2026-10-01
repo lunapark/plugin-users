@@ -3,4 +3,4 @@ export { configureUsers, ECookiesKey, type TPublicUser, type TUsersRuntimeOption
 export { authConnect, authLink, getAuthorizationUrl, passwordConnect, type TConnectMode } from "@/runtime/connect.ts";
 export { generateHexToken, hashPassword, verifyPassword } from "@/runtime/hash.ts";
 export { assertAuthenticated, assertPermission, getPermissionsFromRoles, hasPermission } from "@/runtime/permission.ts";
-export { anonymousUser, disconnect, listSessions, resolveUser, revokeSession } from "@/runtime/session.ts";
+export { anonymousUser, connectUser, disconnect, disconnectUser, listSessions, resolveUser, revokeSession } from "@/runtime/session.ts";

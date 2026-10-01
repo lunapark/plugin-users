@@ -94,6 +94,27 @@ export async function disconnect(mode: "logout" | "all") {
     cookies.clear(ECookiesKey.Session);
 }
 
+export async function connectUser(userId: string) {
+    const user = (await getRuntime().db.users.find({ id: userId }))[0];
+
+    if (!user) {
+        throw httpError.NotFound("User not found.");
+    }
+
+    return await openSession(user);
+}
+
+export async function disconnectUser(userId: string) {
+    const { cookies, db } = getRuntime();
+    const session = await getCurrentSession();
+
+    await db.sessions.delete({ user: userId });
+
+    if (session?.user === userId) {
+        cookies.clear(ECookiesKey.Session);
+    }
+}
+
 function toIsoDate(value?: Date | string | number) {
     return value ? new Date(value).toISOString() : "";
 }

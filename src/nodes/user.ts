@@ -4,7 +4,7 @@ import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
 import { deleteUser } from "@/runtime/account.ts";
 import type { TConnectMode } from "@/runtime/connect.ts";
 import { passwordConnect } from "@/runtime/connect.ts";
-import { disconnect, resolveUser } from "@/runtime/session.ts";
+import { anonymousUser, connectUser, disconnect, disconnectUser, resolveUser } from "@/runtime/session.ts";
 
 export const serverTarget = "@luna-park/plugin-users/server";
 
@@ -21,25 +21,35 @@ export default [
         },
         outputs: {
             out_exec: LogicType.exec(),
+            out_connected: LogicType.boolean({ name: "connected" }),
             out_user: middlewareUserSchema
         },
         display: {
             config: {
-                scope: ELogicScope.Backend
+                scope: ELogicScope.Frontend
             }
         },
         methods: {
             async in_exec() {
-                this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
+                try {
+                    this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
+                }
+                catch (error) {
+                    console.error(error);
+                    this.out_user = anonymousUser;
+                }
+                this.out_connected = !!this.out_user.id;
                 await this.out_exec();
             }
         },
         build: {
             generate: () => `async function () {
-                this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode);
+                const user = await route({ method: "post", url: "/_users/connect" }, { body: { login: this.in_login, mode: this.in_mode, password: this.in_password } });
+                this.out_connected = !!user?.id;
+                this.out_user = this.out_connected ? user : ${ JSON.stringify(anonymousUser) };
                 await this.out_exec();
             }`,
-            imports: [{ name: "passwordConnect", target: serverTarget }]
+            imports: [{ name: "route", target: "@/utils/api" }]
         }
     }),
     makeLogicNode({
@@ -53,7 +63,7 @@ export default [
         },
         display: {
             config: {
-                scope: ELogicScope.Backend
+                scope: ELogicScope.Frontend
             }
         },
         methods: {
@@ -64,10 +74,73 @@ export default [
         },
         build: {
             generate: () => `async function () {
-                await disconnect(this.in_mode);
+                await route({ method: "post", url: "/_users/disconnect" }, { body: { mode: this.in_mode } });
                 await this.out_exec();
             }`,
-            imports: [{ name: "disconnect", target: serverTarget }]
+            imports: [{ name: "route", target: "@/utils/api" }]
+        }
+    }),
+    makeLogicNode({
+        name: "user/connect-by-id",
+        inputs: {
+            in_exec: LogicType.exec(),
+            in_id: LogicType.string({ name: "User id" })
+        },
+        outputs: {
+            out_exec: LogicType.exec(),
+            out_user: middlewareUserSchema
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
+            }
+        },
+        documentation: {
+            description: "Connect the caller as any user, without a password. Protect the route with a permission guard."
+        },
+        methods: {
+            async in_exec() {
+                this.out_user = await connectUser(this.in_id);
+                await this.out_exec();
+            }
+        },
+        build: {
+            generate: () => `async function () {
+                this.out_user = await connectUser(this.in_id);
+                await this.out_exec();
+            }`,
+            imports: [{ name: "connectUser", target: serverTarget }]
+        }
+    }),
+    makeLogicNode({
+        name: "user/disconnect-by-id",
+        inputs: {
+            in_exec: LogicType.exec(),
+            in_id: LogicType.string({ name: "User id" })
+        },
+        outputs: {
+            out_exec: LogicType.exec()
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
+            }
+        },
+        documentation: {
+            description: "Log out every session of any user. Protect the route with a permission guard."
+        },
+        methods: {
+            async in_exec() {
+                await disconnectUser(this.in_id);
+                await this.out_exec();
+            }
+        },
+        build: {
+            generate: () => `async function () {
+                await disconnectUser(this.in_id);
+                await this.out_exec();
+            }`,
+            imports: [{ name: "disconnectUser", target: serverTarget }]
         }
     }),
     makeLogicNode({
