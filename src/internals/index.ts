@@ -2,6 +2,7 @@ import { reactive } from "vue";
 
 import type { TGeneralSettings } from "@/internals/general.ts";
 import { EIdentifierType } from "@/internals/general.ts";
+import { getProviderPreset } from "@/internals/presets.ts";
 import type { TProvider } from "@/internals/providers.ts";
 import type { TPermission, TRole } from "@/internals/roles.ts";
 import { addPermissionsToRole, createPermission, createRole } from "@/internals/roles.ts";
@@ -26,20 +27,39 @@ export const internals = reactive<TInternals>({
 
 export function addPermission(permission: TPermission) {
     if (internals.permissions[permission.id]) {
-        alert(`Permission with id ${ permission.id } already exists.`);
-        return;
+        return false;
     }
 
     internals.permissions[permission.id] = permission;
+    return true;
 }
 
 export function addRole(role: TRole) {
     if (internals.roles[role.id]) {
-        alert(`Role with id "${ role.id }" already exists.`);
-        return;
+        return false;
     }
 
     internals.roles[role.id] = role;
+    return true;
+}
+
+export function setIdentifier(identifier: EIdentifierType) {
+    const previous = internals.general.identifier;
+    internals.general.identifier = identifier;
+
+    for (const provider of Object.values(internals.providers)) {
+        const preset = getProviderPreset(provider.preset);
+
+        if (!preset) {
+            continue;
+        }
+
+        for (const data of [provider.data.development, provider.data.production]) {
+            if (data.api.value === preset.api.value[previous]) {
+                data.api.value = preset.api.value[identifier];
+            }
+        }
+    }
 }
 
 function initInternals() {

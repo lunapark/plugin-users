@@ -27,8 +27,8 @@ export function getInjections({ internals }: TEnv<never, TInternals>) {
 
     // language=JavaScript
     const serverImport = `
-import { authConnect, configureUsers, generateHexToken, getAuthorizationUrl, resolveUser } from "${ serverTarget }";
-import { dbDelete, dbFind, dbInsert, dbQuerySelect } from "@/database/index.js";
+import { authConnect, authLink, configureUsers, generateHexToken, getAuthorizationUrl, resolveUser } from "${ serverTarget }";
+import { dbDelete, dbFind, dbInsert, dbQuerySelect, dbUpdate } from "@/database/index.js";
 import { getRequestContext } from "@/context.js";
 `;
 
@@ -50,6 +50,7 @@ function getUsersCookie(request, key) {
 
 configureUsers({
     config: {
+        identifier: ${ JSON.stringify(internals.general.identifier) },
         providers: usersProviders,
         roles: ${ JSON.stringify(getRolesPermissions(internals.roles)) }
     },
@@ -62,7 +63,8 @@ configureUsers({
         sessions: {
             delete: (filter) => dbDelete(sessionsTable, filter),
             find: (filter) => dbFind(sessionsTable, filter),
-            insert: (data) => dbInsert(sessionsTable, data)
+            insert: (data) => dbInsert(sessionsTable, data),
+            update: (filter, data) => dbUpdate(sessionsTable, filter, data)
         },
         users: {
             delete: (filter) => dbDelete(usersTable, filter),
@@ -75,9 +77,11 @@ configureUsers({
                 operation: { conditions: [{ operation: "contains", source: ["auth"], target: { [providerId]: id }, type: "value" }], type: "and" },
                 orders: []
             }),
-            insert: (data) => dbInsert(usersTable, data)
+            insert: (data) => dbInsert(usersTable, data),
+            update: (filter, data) => dbUpdate(usersTable, filter, data)
         }
-    }
+    },
+    secret: serverConfig.secret
 });
 
 server.addHook("preHandler", async (request) => {
@@ -90,32 +94,42 @@ await server.register(async (users) => {
     users.get("/_users/me", async (request) => request.context.in_user);
 
     users.get("/_users/oauth/start", async (request, reply) => {
-        const { mode, provider } = request.query;
-        if (!usersProviders[provider] || !["login", "signup", "both"].includes(mode)) {
-            return reply.code(400).send({ message: "Invalid OAuth provider or mode." });
+        const { mode, origin, provider } = request.query;
+        if (!usersProviders[provider] || !["login", "signup", "both", "link"].includes(mode) || !URL.canParse(origin) || new URL(origin).origin !== origin) {
+            return reply.code(400).send({ message: "Invalid OAuth provider, mode or origin." });
+        }
+        const user = request.context.in_user.id;
+        if (mode === "link" && !user) {
+            return reply.code(401).send({ message: "You must be logged in to link an account." });
         }
         const state = generateHexToken(16);
-        reply.setCookie("users_oauth", JSON.stringify({ mode, provider, state }), { ...usersCookieOptions, maxAge: 600, sameSite: "lax" });
+        reply.setCookie("users_oauth", JSON.stringify({ mode, origin, provider, state, user }), { ...usersCookieOptions, maxAge: 600, sameSite: "lax" });
         return reply.redirect(getAuthorizationUrl(usersProviders[provider], state));
     });
 
     users.get("/_users/oauth/callback", async (request, reply) => {
         const saved = getUsersCookie(request, "users_oauth");
         reply.clearCookie("users_oauth", { path: "/" });
+        if (!saved) {
+            return reply.code(400).type("text/html").send("OAuth session expired. Please try again.");
+        }
+        const { mode, origin, provider, state, user } = JSON.parse(saved);
         let status = "error";
-        if (saved) {
-            const { mode, provider, state } = JSON.parse(saved);
-            if (state === request.query.state && request.query.code) {
-                try {
+        if (state === request.query.state && request.query.code) {
+            try {
+                if (mode === "link") {
+                    await authLink(provider, request.query.code, user);
+                }
+                else {
                     await authConnect(provider, request.query.code, mode);
-                    status = "connected";
                 }
-                catch (error) {
-                    console.error(error);
-                }
+                status = "connected";
+            }
+            catch (error) {
+                console.error(error);
             }
         }
-        return reply.type("text/html").send(\`<script>window.opener?.postMessage({ oauth: "\${ status }" }, "*");window.close();</script>\`);
+        return reply.type("text/html").send(\`<script>window.opener?.postMessage({ oauth: \${ JSON.stringify(status) } }, \${ JSON.stringify(origin) });window.close();</script>\`);
     });
 }, { prefix: serverConfig.prefix });
 `;

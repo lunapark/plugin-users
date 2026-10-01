@@ -3,6 +3,7 @@ import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
 import { internals } from "@/internals";
 import { serverTarget } from "@/nodes/user.ts";
+import { setRoles } from "@/runtime/account.ts";
 import { assertPermission, hasPermission } from "@/runtime/permission.ts";
 
 function getPermissionInput() {
@@ -78,6 +79,40 @@ export default [
                 await this.out_exec();
             }`,
             imports: [{ name: "assertPermission", target: serverTarget }]
+        }
+    }),
+
+    makeLogicNode({
+        name: "roles/set-roles",
+        inputs: {
+            in_exec: LogicType.exec(),
+            in_id: LogicType.string({ name: "User id" }),
+            in_roles: LogicType.array(LogicType.string(), { name: "Roles" })
+        },
+        outputs: {
+            out_exec: LogicType.exec(),
+            out_user: middlewareUserSchema
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
+            }
+        },
+        documentation: {
+            description: "Replace a user's roles. Every role must exist in the plugin settings."
+        },
+        methods: {
+            async in_exec() {
+                this.out_user = await setRoles(this.in_id, this.in_roles);
+                await this.out_exec();
+            }
+        },
+        build: {
+            generate: () => `async function () {
+                this.out_user = await setRoles(this.in_id, this.in_roles);
+                await this.out_exec();
+            }`,
+            imports: [{ name: "setRoles", target: serverTarget }]
         }
     })
 ];

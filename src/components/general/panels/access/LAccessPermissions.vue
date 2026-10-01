@@ -7,8 +7,7 @@
             class="permission"
         >
             <LInput
-                disabled
-                :model-value="permission.label"
+                v-model="permission.label"
                 small
             />
             <LButton
@@ -25,7 +24,7 @@
                 small
             />
             <LButton
-                :disabled="!newPermission"
+                :disabled="!newPermission.trim()"
                 :icon="faPlus"
                 primary
                 small
@@ -38,7 +37,7 @@
 
 <script setup lang="ts">
 import { faPlus, faTrash } from "@fortawesome/pro-solid-svg-icons";
-import { LButton, LInput } from "@luna-park/design";
+import { alert, confirm, LButton, LInput } from "@luna-park/design";
 import { kebabCase } from "es-toolkit";
 import { ref } from "vue";
 
@@ -46,15 +45,19 @@ import { addPermission, internals } from "@/internals";
 
 const newPermission = ref("");
 
-function addNewPermission() {
-    addPermission({
-        id: kebabCase(newPermission.value),
-        label: newPermission.value
-    });
+async function addNewPermission() {
+    const label = newPermission.value.trim();
+
+    if (!addPermission({ id: kebabCase(label) || crypto.randomUUID(), label })) {
+        await alert(`Permission "${ label }" already exists.`);
+        return;
+    }
+
+    newPermission.value = "";
 }
 
-function deletePermission(permissionId: string) {
-    if (!confirm(`Are you sure you want to delete the permission "${ internals.permissions[permissionId]?.label }"?`)) {
+async function deletePermission(permissionId: string) {
+    if (!await confirm(`Are you sure you want to delete the permission "${ internals.permissions[permissionId]?.label }"?`)) {
         return;
     }
 

@@ -5,19 +5,34 @@ import type { TProviderData } from "@/internals/providers.ts";
 import type { TUserRecord } from "@/runtime/config.ts";
 import { getRuntime } from "@/runtime/config.ts";
 import { hashPassword, verifyPassword } from "@/runtime/hash.ts";
-import { openSession } from "@/runtime/session.ts";
+import { openSession, toPublicUser } from "@/runtime/session.ts";
+import { assertValidLogin, assertValidPassword } from "@/runtime/validation.ts";
 
 export type TConnectMode = "login" | "signup" | "both";
 
-export async function passwordConnect(login: string, password: string, mode: TConnectMode) {
-    const { db } = getRuntime();
-    const user = (await db.users.find({ login }))[0];
+let userWrites: Promise<unknown> = Promise.resolve();
 
-    if (mode === "signup" || (mode === "both" && !user)) {
+export function lockUserWrites<T>(task: () => Promise<T>) {
+    const result = userWrites.then(task);
+    userWrites = result.catch(() => undefined);
+    return result;
+}
+
+export async function passwordConnect(rawLogin: string, password: string, mode: TConnectMode) {
+    const { db } = getRuntime();
+    const login = rawLogin.trim();
+
+    if (mode === "signup") {
         return await openSession(await createPasswordUser(login, password));
     }
 
+    const user = (await db.users.find({ login }))[0];
+
     if (!user) {
+        if (mode === "both") {
+            return await openSession(await createPasswordUser(login, password));
+        }
+
         throw httpError.NotFound("User not found.");
     }
 
@@ -35,15 +50,21 @@ export async function passwordConnect(login: string, password: string, mode: TCo
 async function createPasswordUser(login: string, password: string) {
     const { db } = getRuntime();
 
-    if ((await db.users.find({ login }))[0]) {
-        throw httpError.Conflict("User already exists with this login.");
-    }
+    assertValidLogin(login);
+    assertValidPassword(password);
+    const hash = await hashPassword(password);
 
-    return await db.users.insert({ login, password: await hashPassword(password), roles: ["user"] });
+    return await lockUserWrites(async () => {
+        if ((await db.users.find({ login }))[0]) {
+            throw httpError.Conflict("User already exists with this login.");
+        }
+
+        return await db.users.insert({ login, password: hash, roles: ["user"] });
+    });
 }
 
-export async function authConnect(providerId: string, code: string, mode: TConnectMode) {
-    const { config, db } = getRuntime();
+async function getProviderIdentity(providerId: string, code: string) {
+    const { config } = getRuntime();
     const provider = config.providers[providerId];
 
     if (!provider) {
@@ -56,6 +77,12 @@ export async function authConnect(providerId: string, code: string, mode: TConne
         throw httpError.InternalServerError("Can't find identity information in authentication response.");
     }
 
+    return identity;
+}
+
+export async function authConnect(providerId: string, code: string, mode: TConnectMode) {
+    const { db } = getRuntime();
+    const identity = await getProviderIdentity(providerId, code);
     const user = (await db.users.findByAuth(providerId, identity.id))[0];
 
     if (mode === "signup" || (mode === "both" && !user)) {
@@ -72,15 +99,39 @@ export async function authConnect(providerId: string, code: string, mode: TConne
 async function createAuthUser(providerId: string, identity: { id: string; value: string; }): Promise<TUserRecord> {
     const { db } = getRuntime();
 
-    if ((await db.users.find({ login: identity.value }))[0]) {
-        throw httpError.Conflict("User already exists with this login.");
-    }
+    return await lockUserWrites(async () => {
+        if ((await db.users.find({ login: identity.value }))[0]) {
+            throw httpError.Conflict("User already exists with this login.");
+        }
 
-    if ((await db.users.findByAuth(providerId, identity.id))[0]) {
-        throw httpError.Conflict("User already exists with this provider.");
-    }
+        if ((await db.users.findByAuth(providerId, identity.id))[0]) {
+            throw httpError.Conflict("User already exists with this provider.");
+        }
 
-    return await db.users.insert({ auth: { [providerId]: identity.id }, login: identity.value, roles: ["user"] });
+        return await db.users.insert({ auth: { [providerId]: identity.id }, login: identity.value, roles: ["user"] });
+    });
+}
+
+export async function authLink(providerId: string, code: string, userId: string) {
+    const { db } = getRuntime();
+    const identity = await getProviderIdentity(providerId, code);
+
+    return await lockUserWrites(async () => {
+        const user = (await db.users.find({ id: userId }))[0];
+
+        if (!user) {
+            throw httpError.NotFound("User not found.");
+        }
+
+        const linked = (await db.users.findByAuth(providerId, identity.id))[0];
+
+        if (linked && linked.id !== user.id) {
+            throw httpError.Conflict("This provider account is already linked to another user.");
+        }
+
+        await db.users.update({ id: user.id }, { auth: { ...user.auth, [providerId]: identity.id } });
+        return toPublicUser(user);
+    });
 }
 
 export function getAuthorizationUrl(provider: TProviderData, state?: string) {
@@ -105,6 +156,17 @@ export function getAuthorizationUrl(provider: TProviderData, state?: string) {
     return url.href;
 }
 
+async function readJson(response: Response, label: string) {
+    const text = await response.text();
+
+    try {
+        return JSON.parse(text);
+    }
+    catch {
+        throw httpError.BadGateway(`OAuth ${ label } returned an invalid response (${ response.status }).`);
+    }
+}
+
 async function getIdentity(provider: TProviderData, code: string) {
     const tokenResponse = await fetch(provider.url.token, {
         body: new URLSearchParams({
@@ -121,9 +183,9 @@ async function getIdentity(provider: TProviderData, code: string) {
         method: "POST"
     });
 
-    const token = await tokenResponse.json() as { access_token?: string; error?: string; error_description?: string; };
+    const token = await readJson(tokenResponse, "token exchange") as { access_token?: string; error?: string; error_description?: string; };
 
-    if (!token.access_token) {
+    if (!tokenResponse.ok || !token.access_token) {
         throw httpError.Unauthorized(`OAuth token exchange failed: ${ token.error_description ?? token.error ?? tokenResponse.status }`);
     }
 
@@ -135,7 +197,11 @@ async function getIdentity(provider: TProviderData, code: string) {
         method: "GET"
     });
 
-    const identity = await identityResponse.json();
+    const identity = await readJson(identityResponse, "identity request");
+
+    if (!identityResponse.ok) {
+        throw httpError.BadGateway(`OAuth identity request failed (${ identityResponse.status }).`);
+    }
 
     return {
         id: String(get(identity, provider.api.id) ?? ""),

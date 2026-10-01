@@ -1,7 +1,7 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
 import { serverTarget } from "@/nodes/user.ts";
-import { hashPassword, verifyPassword } from "@/runtime/hash.ts";
+import { defaultHashOptions, hashPassword, verifyPassword } from "@/runtime/hash.ts";
 
 export default [
     makeLogicNode({
@@ -15,10 +15,10 @@ export default [
             out_hash: LogicType.string({ name: "hash" })
         },
         config: {
-            hashLength: LogicType.number({ default: 64 }),
-            iterations: LogicType.number({ default: 256 }),
-            memory: LogicType.number({ default: 2048 }),
-            parallelism: LogicType.number({ default: 1 })
+            hashLength: LogicType.number({ default: defaultHashOptions.hashLength }),
+            iterations: LogicType.number({ default: defaultHashOptions.iterations }),
+            memory: LogicType.number({ default: defaultHashOptions.memory }),
+            parallelism: LogicType.number({ default: defaultHashOptions.parallelism })
         },
         display: {
             config: {
@@ -33,12 +33,7 @@ export default [
         },
         build: {
             generate: ({ config }) => `async function () {
-                this.out_hash = await hashPassword(this.in_password, ${ JSON.stringify({
-                    hashLength: config?.hashLength ?? 64,
-                    iterations: config?.iterations ?? 256,
-                    memory: config?.memory ?? 2048,
-                    parallelism: config?.parallelism ?? 1
-                }) });
+                this.out_hash = await hashPassword(this.in_password, ${ JSON.stringify(config ?? {}) });
                 await this.out_exec();
             }`,
             imports: [{ name: "hashPassword", target: serverTarget }]

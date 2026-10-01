@@ -90,3 +90,19 @@ export function resolveProductionData(provider: TProvider): TProviderData {
         }
     };
 }
+
+export function getMissingProductionFields(provider: TProvider) {
+    const data = resolveProductionData(provider);
+    const fields: Array<[string, string]> = [
+        ["Client ID", data.client.id],
+        ["Client secret", data.client.secret],
+        ["Redirect URL", data.url.redirect],
+        ["Authorization URL", data.url.authorization],
+        ["Token URL", data.url.token],
+        ["API target", data.api.url],
+        ["API id path", data.api.id],
+        ["API value path", data.api.value]
+    ];
+
+    return fields.filter(([, value]) => !value.trim()).map(([label]) => label);
+}

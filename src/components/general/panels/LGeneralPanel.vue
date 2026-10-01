@@ -4,12 +4,13 @@
         <section>
             <div>
                 <LDropdown
-                    v-model="internals.general.identifier"
                     label="Identifier type"
+                    :model-value="internals.general.identifier"
                     :options="options"
+                    @update:model-value="setIdentifier($event as EIdentifierType)"
                 />
                 <span class="description">
-                    The identifier type used to identify users. This is stored as <code>signup</code> in the database.
+                    The identifier type used to identify users. This is stored as <code>login</code> in the database.
                 </span>
             </div>
         </section>
@@ -20,7 +21,7 @@
 import { LDropdown } from "@luna-park/design";
 
 import LPanelWrapper from "@/components/general/panels/LPanelWrapper.vue";
-import { internals } from "@/internals";
+import { internals, setIdentifier } from "@/internals";
 import { EIdentifierType } from "@/internals/general.ts";
 
 const options = [

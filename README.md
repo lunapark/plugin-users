@@ -42,9 +42,17 @@ Every backend route also receives the current user as the `user` input (`id`, `l
 | `user/connect` | Backend | Log in, sign up, or both (`login` / `signup` / `both`) with a login and password. Outputs the connected user. |
 | `user/disconnect` | Backend | Log out from this device (`logout`) or from every device (`all`). |
 | `user/current` | Frontend | Get the user connected in this browser, and whether someone is connected. |
+| `user/change-password` | Backend | Change the connected user's password (current password required) and log out their other devices. |
+| `user/request-password-reset` | Backend | Create a one-hour, single-use reset token for a login. Send it to the user yourself (by email, for example). |
+| `user/reset-password` | Backend | Set a new password from a reset token and log out every device. |
+| `user/list-sessions` | Backend | List the connected user's active sessions, flagging the current one. |
+| `user/revoke-session` | Backend | Log out one of the connected user's sessions. |
+| `user/delete` | Backend | Delete a user by id, with all their sessions. |
 | `oauth/connect` | Frontend | Open the provider's sign-in popup, then connect the user (`login` / `signup` / `both`). |
+| `oauth/link` | Frontend | Link a provider account to the connected user, so they can also sign in with it. |
 | `roles/has-permission` | Backend | Check if a user has a permission. |
 | `roles/assert-permission` | Backend | Stop with an error if a user lacks a permission. |
+| `roles/set-roles` | Backend | Replace a user's roles (unknown roles are rejected). |
 | `hash/hash-argon2` | Backend | Hash any string with Argon2id. |
 | `hash/verify-argon2` | Backend | Check a string against an Argon2 hash. |
 

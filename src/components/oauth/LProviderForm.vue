@@ -17,6 +17,14 @@
             :redirect-placeholder="developmentRedirectUrl"
             title="Development"
         />
+        <LContainer
+            v-if="missingProductionFields.length"
+            small
+            title="Production is not ready"
+            :type="EContainerType.Warning"
+        >
+            OAuth sign-in will fail once deployed. Missing: {{ missingProductionFields.join(", ") }}.
+        </LContainer>
         <LProviderDataForm
             :collapsible="!!preset"
             description="Used in production. Empty fields fall back to development values, except the redirect URL."
@@ -34,20 +42,21 @@
 </template>
 
 <script setup lang="ts">
-import { confirm, LButton, LInput } from "@luna-park/design";
+import { confirm, EContainerType, LButton, LContainer, LInput } from "@luna-park/design";
 import { computed } from "vue";
 
 import LProviderDataForm from "@/components/oauth/LProviderDataForm.vue";
 import LProviderGuide from "@/components/oauth/LProviderGuide.vue";
 import { getProviderPreset } from "@/internals/presets.ts";
 import type { TProvider } from "@/internals/providers.ts";
-import { developmentRedirectUrl, productionRedirectUrl } from "@/internals/providers.ts";
+import { developmentRedirectUrl, getMissingProductionFields, productionRedirectUrl } from "@/internals/providers.ts";
 
 const props = defineProps<{
     provider: TProvider;
 }>();
 
 const preset = computed(() => getProviderPreset(props.provider.preset));
+const missingProductionFields = computed(() => getMissingProductionFields(props.provider));
 
 const emits = defineEmits<{
     (e: "delete"): void;

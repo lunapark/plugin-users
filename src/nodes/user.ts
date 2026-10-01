@@ -1,6 +1,7 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
 import { middlewareUserSchema } from "@/hooks/backend/middleware.ts";
+import { deleteUser } from "@/runtime/account.ts";
 import type { TConnectMode } from "@/runtime/connect.ts";
 import { passwordConnect } from "@/runtime/connect.ts";
 import { disconnect, resolveUser } from "@/runtime/session.ts";
@@ -101,6 +102,37 @@ export default [
                 await this.out_exec();
             }`,
             imports: [{ name: "route", target: "@/utils/api" }]
+        }
+    }),
+    makeLogicNode({
+        name: "user/delete",
+        inputs: {
+            in_exec: LogicType.exec(),
+            in_id: LogicType.string({ name: "User id" })
+        },
+        outputs: {
+            out_exec: LogicType.exec()
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
+            }
+        },
+        documentation: {
+            description: "Delete a user and all their sessions."
+        },
+        methods: {
+            async in_exec() {
+                await deleteUser(this.in_id);
+                await this.out_exec();
+            }
+        },
+        build: {
+            generate: () => `async function () {
+                await deleteUser(this.in_id);
+                await this.out_exec();
+            }`,
+            imports: [{ name: "deleteUser", target: serverTarget }]
         }
     })
 ];

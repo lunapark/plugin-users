@@ -7,8 +7,7 @@
             class="role"
         >
             <LInput
-                disabled
-                :model-value="role.label"
+                v-model="role.label"
                 small
             />
             <LButton
@@ -26,7 +25,7 @@
                 small
             />
             <LButton
-                :disabled="!newRole"
+                :disabled="!newRole.trim()"
                 :icon="faPlus"
                 primary
                 small
@@ -40,7 +39,7 @@
 <script setup lang="ts">
 
 import { faPlus, faTrash } from "@fortawesome/pro-solid-svg-icons";
-import { LButton, LInput } from "@luna-park/design";
+import { alert, confirm, LButton, LInput } from "@luna-park/design";
 import { kebabCase } from "es-toolkit";
 import { ref } from "vue";
 
@@ -48,18 +47,19 @@ import { addRole, internals } from "@/internals";
 
 const newRole = ref("");
 
-function addNewRole() {
-    addRole({
-        id: kebabCase(newRole.value),
-        label: newRole.value,
-        permissions: []
-    });
+async function addNewRole() {
+    const label = newRole.value.trim();
+
+    if (!addRole({ id: kebabCase(label) || crypto.randomUUID(), label, permissions: [] })) {
+        await alert(`Role "${ label }" already exists.`);
+        return;
+    }
 
     newRole.value = "";
 }
 
-function deleteRole(roleId: string) {
-    if (!confirm(`Are you sure you want to delete the role "${ internals.roles[roleId]?.label }"?`)) {
+async function deleteRole(roleId: string) {
+    if (!await confirm(`Are you sure you want to delete the role "${ internals.roles[roleId]?.label }"?`)) {
         return;
     }
 
