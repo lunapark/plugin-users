@@ -86,6 +86,19 @@ When you build your project, the plugin wires itself into the generated server:
 - **Secrets stay out of the code**: each provider's client secret is written to the project's `.env` as `USERS_OAUTH_SECRET_<PROVIDER_ID>` and read at runtime.
 - **Runtime**: the logic is imported from `@luna-park/plugin-users/server`, which is added to your backend dependencies automatically.
 
+## 🔌 For other plugins
+
+Plugins that depend on Users get its API with `env.getPlugin("users")`:
+
+| Function | Description |
+|---|---|
+| `resolveUser()` | The connected user (`id`, `login`, `roles`), or the anonymous user. |
+| `roles()` | The roles defined in the settings (`id`, `label`). |
+| `usersTable()` | The id of the `Users` table, to reference it with a foreign key. |
+| `onUserDelete(listener)` | Runs `listener(userId)` before `user/delete` deletes a user. Returns a function that removes the listener. |
+
+In the generated backend, `resolveUser` and `onUserDelete` are exported by `@luna-park/plugin-users/server`.
+
 ## 🛠️ Development
 
 ```bash

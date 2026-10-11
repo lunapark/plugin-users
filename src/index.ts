@@ -2,6 +2,7 @@ import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
 import { makePlugin } from "@luna-park/plugin";
 import { shallowRef } from "vue";
 
+import { getApi } from "@/api.ts";
 import { backImports, frontImports, getEnv, getInjections } from "@/build.ts";
 import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
 import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
@@ -28,6 +29,7 @@ export default makePlugin({
         env: getEnv,
         injections: getInjections
     },
+    api: getApi,
     editor: {
         guards: getGuards,
         nodes: getNodes

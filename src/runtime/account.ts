@@ -8,6 +8,15 @@ import { assertValidPassword } from "@/runtime/validation.ts";
 
 const resetTokenDuration = 1000 * 60 * 60;
 
+type TUserDeleteListener = (userId: string) => Promise<void> | void;
+
+const userDeleteListeners = new Set<TUserDeleteListener>();
+
+export function onUserDelete(listener: TUserDeleteListener) {
+    userDeleteListeners.add(listener);
+    return () => userDeleteListeners.delete(listener);
+}
+
 export async function changePassword(currentPassword: string, newPassword: string) {
     const { db } = getRuntime();
     const { session, user } = await requireCurrentUser();
@@ -72,6 +81,10 @@ export async function deleteUser(userId: string) {
     }
 
     const current = await requireCurrentSession().catch(() => undefined);
+
+    for (const listener of userDeleteListeners) {
+        await listener(user.id);
+    }
 
     await db.sessions.delete({ user: user.id });
     await db.users.delete({ id: user.id });
