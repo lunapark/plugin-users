@@ -14,27 +14,25 @@ export default (storeId: string) => [
     makeLogicNode({
         name: "user/connect",
         inputs: {
-            /* eslint-disable sort-keys-custom-order/object-keys */
             in_exec: LogicType.exec(),
             in_login: LogicType.string({ name: "Login" }),
             in_password: LogicType.string({ name: "Password" }),
             in_mode: LogicType.string({ name: "Mode", default: "login", enum: ["login", "signup", "both"] })
-            /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
             out_exec: LogicType.exec(),
             out_user: middlewareUserSchema
-        },
-        display: {
-            config: {
-                scope: ELogicScope.Frontend
-            }
         },
         methods: {
             async in_exec() {
                 this.out_user = await passwordConnect(this.in_login, this.in_password, this.in_mode as TConnectMode);
                 setUserStore(this.out_user);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Frontend
             }
         },
         build: {
@@ -59,16 +57,16 @@ export default (storeId: string) => [
         outputs: {
             out_exec: LogicType.exec()
         },
-        display: {
-            config: {
-                scope: ELogicScope.Frontend
-            }
-        },
         methods: {
             async in_exec() {
                 await disconnect(this.in_mode as "logout" | "all");
                 setUserStore(anonymousUser);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Frontend
             }
         },
         build: {
@@ -90,6 +88,12 @@ export default (storeId: string) => [
             out_exec: LogicType.exec(),
             out_user: middlewareUserSchema
         },
+        methods: {
+            async in_exec() {
+                this.out_user = await connectUser(this.in_id);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -97,12 +101,6 @@ export default (storeId: string) => [
         },
         documentation: {
             description: "Connect the caller as any user, without a password. Protect the route with a permission guard."
-        },
-        methods: {
-            async in_exec() {
-                this.out_user = await connectUser(this.in_id);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
@@ -121,6 +119,12 @@ export default (storeId: string) => [
         outputs: {
             out_exec: LogicType.exec()
         },
+        methods: {
+            async in_exec() {
+                await disconnectUser(this.in_id);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -128,12 +132,6 @@ export default (storeId: string) => [
         },
         documentation: {
             description: "Log out every session of any user. Protect the route with a permission guard."
-        },
-        methods: {
-            async in_exec() {
-                await disconnectUser(this.in_id);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
@@ -153,14 +151,6 @@ export default (storeId: string) => [
             out_connected: LogicType.boolean({ name: "connected" }),
             out_user: middlewareUserSchema
         },
-        display: {
-            config: {
-                scope: ELogicScope.Frontend
-            }
-        },
-        documentation: {
-            description: "Fetch the user connected in this browser."
-        },
         methods: {
             async in_exec() {
                 this.out_user = await resolveUser();
@@ -168,6 +158,14 @@ export default (storeId: string) => [
                 setUserStore(this.out_user);
                 await this.out_exec();
             }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Frontend
+            }
+        },
+        documentation: {
+            description: "Fetch the user connected in this browser."
         },
         build: {
             generate: () => `async function () {
@@ -188,6 +186,12 @@ export default (storeId: string) => [
         outputs: {
             out_exec: LogicType.exec()
         },
+        methods: {
+            async in_exec() {
+                await deleteUser(this.in_id);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -195,12 +199,6 @@ export default (storeId: string) => [
         },
         documentation: {
             description: "Delete a user and all their sessions."
-        },
-        methods: {
-            async in_exec() {
-                await deleteUser(this.in_id);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {

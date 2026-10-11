@@ -19,6 +19,13 @@ export default (policy: TPasswordPolicy) => [
             out_valid: LogicType.boolean({ name: "valid" }),
             out_error: LogicType.string({ name: "error" })
         },
+        methods: {
+            async in_exec() {
+                this.out_error = getPasswordError(this.in_password, internals.general.password);
+                this.out_valid = !this.out_error;
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Shared
@@ -26,13 +33,6 @@ export default (policy: TPasswordPolicy) => [
         },
         documentation: {
             description: "Check a password against the password policy set in the Users settings. Outputs the reason when it is not strong enough."
-        },
-        methods: {
-            async in_exec() {
-                this.out_error = getPasswordError(this.in_password, internals.general.password);
-                this.out_valid = !this.out_error;
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
@@ -53,6 +53,12 @@ export default (policy: TPasswordPolicy) => [
         outputs: {
             out_exec: LogicType.exec()
         },
+        methods: {
+            async in_exec() {
+                await changePassword(this.in_current, this.in_password);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -60,12 +66,6 @@ export default (policy: TPasswordPolicy) => [
         },
         documentation: {
             description: "Change the connected user's password. Other sessions of this user are logged out."
-        },
-        methods: {
-            async in_exec() {
-                await changePassword(this.in_current, this.in_password);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
@@ -86,14 +86,6 @@ export default (policy: TPasswordPolicy) => [
             out_token: LogicType.string({ name: "token" }),
             out_user: middlewareUserSchema
         },
-        display: {
-            config: {
-                scope: ELogicScope.Backend
-            }
-        },
-        documentation: {
-            description: "Create a password reset token, valid for one hour and usable once. Send it to the user (by email, for example), then pass it to user/reset-password."
-        },
         methods: {
             async in_exec() {
                 const { token, user } = await createPasswordResetToken(this.in_login);
@@ -101,6 +93,14 @@ export default (policy: TPasswordPolicy) => [
                 this.out_user = user;
                 await this.out_exec();
             }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
+            }
+        },
+        documentation: {
+            description: "Create a password reset token, valid for one hour and usable once. Send it to the user (by email, for example), then pass it to user/reset-password."
         },
         build: {
             generate: () => `async function () {
@@ -115,15 +115,21 @@ export default (policy: TPasswordPolicy) => [
     makeLogicNode({
         name: "user/reset-password",
         inputs: {
-            /* eslint-disable sort-keys-custom-order/object-keys */
+
             in_exec: LogicType.exec(),
             in_token: LogicType.string({ name: "Token" }),
             in_password: LogicType.string({ name: "New password" })
-            /* eslint-enable sort-keys-custom-order/object-keys */
+
         },
         outputs: {
             out_exec: LogicType.exec(),
             out_user: middlewareUserSchema
+        },
+        methods: {
+            async in_exec() {
+                this.out_user = await resetPassword(this.in_token, this.in_password);
+                await this.out_exec();
+            }
         },
         display: {
             config: {
@@ -132,12 +138,6 @@ export default (policy: TPasswordPolicy) => [
         },
         documentation: {
             description: "Set a new password from a reset token. Every session of this user is logged out."
-        },
-        methods: {
-            async in_exec() {
-                this.out_user = await resetPassword(this.in_token, this.in_password);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {

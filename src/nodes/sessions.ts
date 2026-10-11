@@ -20,6 +20,12 @@ export default [
             out_exec: LogicType.exec(),
             out_sessions: LogicType.array(sessionSchema, { name: "sessions" })
         },
+        methods: {
+            async in_exec() {
+                this.out_sessions = await listSessions();
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -27,12 +33,6 @@ export default [
         },
         documentation: {
             description: "List the active sessions (devices) of the connected user."
-        },
-        methods: {
-            async in_exec() {
-                this.out_sessions = await listSessions();
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
@@ -51,6 +51,12 @@ export default [
         outputs: {
             out_exec: LogicType.exec()
         },
+        methods: {
+            async in_exec() {
+                await revokeSession(this.in_session);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -58,12 +64,6 @@ export default [
         },
         documentation: {
             description: "Log out one of the connected user's sessions."
-        },
-        methods: {
-            async in_exec() {
-                await revokeSession(this.in_session);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {

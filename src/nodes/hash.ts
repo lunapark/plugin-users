@@ -20,15 +20,15 @@ export default [
             memory: LogicType.number({ default: defaultHashOptions.memory }),
             parallelism: LogicType.number({ default: defaultHashOptions.parallelism })
         },
-        display: {
-            config: {
-                scope: ELogicScope.Backend
-            }
-        },
         methods: {
             async in_exec() {
                 this.out_hash = await hashPassword(this.in_password, this.config);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
             }
         },
         build: {
@@ -42,25 +42,23 @@ export default [
     makeLogicNode({
         name: "hash/verify-argon2",
         inputs: {
-            /* eslint-disable sort-keys-custom-order/object-keys */
             in_exec: LogicType.exec(),
             in_password: LogicType.string({ name: "password" }),
             in_hash: LogicType.string({ name: "hash" })
-            /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
             out_exec: LogicType.exec(),
             out_verified: LogicType.boolean({ name: "verified" })
         },
-        display: {
-            config: {
-                scope: ELogicScope.Backend
-            }
-        },
         methods: {
             async in_exec() {
                 this.out_verified = await verifyPassword(this.in_password, this.in_hash);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
             }
         },
         build: {

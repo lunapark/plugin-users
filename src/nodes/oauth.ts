@@ -94,22 +94,12 @@ export default (storeId: string) => [
         name: "oauth/connect",
         inputs: {
             in_exec: LogicType.exec(),
-            /* eslint-disable sort-keys-custom-order/object-keys */
             in_provider: getProviderInput(),
             in_mode: LogicType.string({ name: "Mode", default: "signup", enum: ["login", "signup", "both"] })
-            /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
             out_exec: LogicType.exec(),
             out_connected: LogicType.boolean({ name: "connected" })
-        },
-        build: {
-            generate: () => generateOAuthPopup("this.in_mode", "out_connected", generateUserStoreUpdate(storeId, "result.user"))
-        },
-        display: {
-            config: {
-                scope: ELogicScope.Frontend
-            }
         },
         methods: {
             async in_exec() {
@@ -120,6 +110,14 @@ export default (storeId: string) => [
                 this.out_connected = !!code;
                 await this.out_exec();
             }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Frontend
+            }
+        },
+        build: {
+            generate: () => generateOAuthPopup("this.in_mode", "out_connected", generateUserStoreUpdate(storeId, "result.user"))
         }
     }),
     makeLogicNode({
@@ -132,17 +130,6 @@ export default (storeId: string) => [
             out_exec: LogicType.exec(),
             out_linked: LogicType.boolean({ name: "linked" })
         },
-        build: {
-            generate: () => generateOAuthPopup("\"link\"", "out_linked")
-        },
-        display: {
-            config: {
-                scope: ELogicScope.Frontend
-            }
-        },
-        documentation: {
-            description: "Link an OAuth provider account to the connected user, so they can also sign in with it."
-        },
         methods: {
             async in_exec() {
                 const session = await requireCurrentSession();
@@ -153,6 +140,17 @@ export default (storeId: string) => [
                 this.out_linked = !!code;
                 await this.out_exec();
             }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Frontend
+            }
+        },
+        documentation: {
+            description: "Link an OAuth provider account to the connected user, so they can also sign in with it."
+        },
+        build: {
+            generate: () => generateOAuthPopup("\"link\"", "out_linked")
         }
     })
 ];

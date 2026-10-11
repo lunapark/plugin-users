@@ -20,25 +20,23 @@ export default [
     makeLogicNode({
         name: "roles/has-permission",
         inputs: {
-            /* eslint-disable sort-keys-custom-order/object-keys */
             in_exec: LogicType.exec(),
             in_user: middlewareUserSchema,
             in_permission: getPermissionInput()
-            /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
             out_exec: LogicType.exec(),
             out_valid: LogicType.boolean({ name: "valid" })
         },
-        display: {
-            config: {
-                scope: ELogicScope.Backend
-            }
-        },
         methods: {
             async in_exec() {
                 this.out_valid = hasPermission(this.in_user, this.in_permission);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
             }
         },
         build: {
@@ -53,24 +51,22 @@ export default [
     makeLogicNode({
         name: "roles/assert-permission",
         inputs: {
-            /* eslint-disable sort-keys-custom-order/object-keys */
             in_exec: LogicType.exec(),
             in_user: middlewareUserSchema,
             in_permission: getPermissionInput()
-            /* eslint-enable sort-keys-custom-order/object-keys */
         },
         outputs: {
             out_exec: LogicType.exec()
-        },
-        display: {
-            config: {
-                scope: ELogicScope.Backend
-            }
         },
         methods: {
             async in_exec() {
                 assertPermission(this.in_user, this.in_permission);
                 await this.out_exec();
+            }
+        },
+        display: {
+            config: {
+                scope: ELogicScope.Backend
             }
         },
         build: {
@@ -93,6 +89,12 @@ export default [
             out_exec: LogicType.exec(),
             out_user: middlewareUserSchema
         },
+        methods: {
+            async in_exec() {
+                this.out_user = await setRoles(this.in_id, this.in_roles);
+                await this.out_exec();
+            }
+        },
         display: {
             config: {
                 scope: ELogicScope.Backend
@@ -100,12 +102,6 @@ export default [
         },
         documentation: {
             description: "Replace a user's roles. Every role must exist in the plugin settings."
-        },
-        methods: {
-            async in_exec() {
-                this.out_user = await setRoles(this.in_id, this.in_roles);
-                await this.out_exec();
-            }
         },
         build: {
             generate: () => `async function () {
