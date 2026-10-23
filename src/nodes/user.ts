@@ -45,7 +45,7 @@ export default (storeId: string) => [
                 ${ generateUserStoreUpdate(storeId, "user") }
                 await this.out_exec();
             }`,
-            imports: [{ name: "route", target: "@/utils/api" }]
+            imports: [{ name: "route", target: "@/.utils/api" }]
         }
     }),
     makeLogicNode({
@@ -75,7 +75,7 @@ export default (storeId: string) => [
                 ${ generateUserStoreUpdate(storeId, JSON.stringify(anonymousUser)) }
                 await this.out_exec();
             }`,
-            imports: [{ name: "route", target: "@/utils/api" }]
+            imports: [{ name: "route", target: "@/.utils/api" }]
         }
     }),
     makeLogicNode({
@@ -174,7 +174,7 @@ export default (storeId: string) => [
                 ${ generateUserStoreUpdate(storeId, "this.out_user") }
                 await this.out_exec();
             }`,
-            imports: [{ name: "route", target: "@/utils/api" }]
+            imports: [{ name: "route", target: "@/.utils/api" }]
         }
     }),
     makeLogicNode({

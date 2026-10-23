@@ -151,7 +151,7 @@ await server.register(async (users) => {
 
     // language=JavaScript
     const appSetup = `
-import { route as usersRoute } from "@/utils/api";
+import { route as usersRoute } from "@/.utils/api";
 usersRoute({ method: "get", url: "/_users/me" }).then((user) => {
     ${ generateUserStoreUpdate(internals.files["user-store"], "user") }
 });
