@@ -1,11 +1,12 @@
-import { faShield, faTowerControl } from "@fortawesome/pro-solid-svg-icons";
+import { faArrowRightToBracket, faKey, faShield, faUserShield } from "@fortawesome/pro-solid-svg-icons";
 import { makePlugin } from "@luna-park/plugin";
-import { shallowRef } from "vue";
 
 import { getApi } from "@/api.ts";
 import { backImports, frontImports, getEnv, getInjections } from "@/build.ts";
-import LGeneralSettings from "@/components/general/LGeneralSettings.vue";
-import LOAuthSettings from "@/components/oauth/LOAuthSettings.vue";
+import LAccessSection from "@/components/access/LAccessSection.vue";
+import LPasswordSection from "@/components/general/LPasswordSection.vue";
+import LSignInSection from "@/components/general/LSignInSection.vue";
+import LOAuthSection from "@/components/oauth/LOAuthSection.vue";
 import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
 import { configureEditorRuntime } from "@/editor/runtime.ts";
 import { env } from "@/env.ts";
@@ -23,18 +24,6 @@ export default makePlugin({
     id: "users",
     name: "Users",
     description: "Add user accounts, connections, and roles.",
-    build: {
-        backImports,
-        frontImports,
-        env: getEnv,
-        injections: getInjections
-    },
-    api: getApi,
-    editor: {
-        guards: getGuards,
-        nodes: getNodes
-    },
-    hooks,
     icon,
     internals,
     lifecycle: {
@@ -53,19 +42,51 @@ export default makePlugin({
             setUserStore(await resolveUser());
         }
     },
-    settings: [
-        {
-            component: shallowRef(LGeneralSettings),
-            icon: faTowerControl,
-            label: "General"
-        },
-        {
-            component: shallowRef(LOAuthSettings),
-            icon: faShield,
-            label: "OAuth2"
-        }
-    ],
+    editor: {
+        nodes: getNodes,
+        guards: getGuards
+    },
+    hooks,
     windows: {
         OAuth: LOAuthWindow
+    },
+    build: {
+        backImports,
+        env: getEnv,
+        frontImports,
+        injections: getInjections
+    },
+    api: getApi,
+    workspace: {
+        sections: [
+            {
+                id: "sign-in",
+                component: LSignInSection,
+                description: "How users identify themselves when they sign up and sign in.",
+                icon: faArrowRightToBracket,
+                title: "Sign-in"
+            },
+            {
+                id: "password",
+                component: LPasswordSection,
+                description: "Rules a password must follow on sign-up and password change.",
+                icon: faKey,
+                title: "Password"
+            },
+            {
+                id: "access",
+                component: LAccessSection,
+                description: "Roles assigned to users, and the permissions each role grants. Check a cell to grant a permission.",
+                icon: faUserShield,
+                title: "Roles & permissions"
+            },
+            {
+                id: "oauth",
+                component: LOAuthSection,
+                description: "Let users sign in with an external account. Presets fill in endpoints, scopes and identity mapping.",
+                icon: faShield,
+                title: "OAuth providers"
+            }
+        ]
     }
 });

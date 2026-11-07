@@ -1,6 +1,7 @@
 <template>
     <LCheckbox
         v-model="value"
+        class="toggle"
     />
 </template>
 
@@ -29,5 +30,7 @@ const value = computed({
 </script>
 
 <style scoped>
-
+.toggle {
+    margin-inline: auto;
+}
 </style>

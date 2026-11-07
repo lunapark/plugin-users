@@ -3,6 +3,14 @@
         <div class="header">
             <div class="title">
                 Add a provider
+                <LButton
+                    v-if="closable"
+                    :icon="faXmark"
+                    small
+                    square
+                    transparent
+                    @click="emits('close')"
+                />
             </div>
             <div class="description">
                 Pick a preset to get endpoints, scopes and identity mapping filled in for you. You'll only need a client ID and secret.
@@ -31,13 +39,19 @@
 </template>
 
 <script setup lang="ts">
+import { faXmark } from "@fortawesome/pro-solid-svg-icons";
 import { LButton } from "@luna-park/design";
 
 import LProviderLogo from "@/components/oauth/LProviderLogo.vue";
 import type { TProviderPreset } from "@/internals/presets.ts";
 import { providerPresets } from "@/internals/presets.ts";
 
+defineProps<{
+    closable?: boolean;
+}>();
+
 const emits = defineEmits<{
+    (e: "close"): void;
     (e: "pick", preset?: TProviderPreset): void;
 }>();
 </script>
@@ -55,6 +69,9 @@ const emits = defineEmits<{
         gap: var(--length-xxs);
 
         .title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: var(--font-size-m);
             font-weight: 500;
         }

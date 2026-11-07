@@ -1,6 +1,6 @@
 {
     "name": "@luna-park/plugin-users",
-    "version": "1.6.3",
+    "version": "1.7.0",
     "private": false,
     "description": "Users plugin for Luna Park.",
     "keywords": [
@@ -43,32 +43,32 @@
     "dependencies": {
         "@luna-park/http-errors": "^1.0.0",
         "@vueuse/core": "^15.0.0",
-        "es-toolkit": "^1.52.0",
+        "es-toolkit": "^1.53.2",
         "hash-wasm": "^4.12.0",
-        "vue": "^3.5.43"
+        "vue": "^3.5.45"
     },
     "devDependencies": {
         "@fortawesome/pro-solid-svg-icons": "link:..\\..\\@fortawesome\\pro-solid-svg-icons",
         "@histoire/plugin-vue": "1.0.0-beta.1",
-        "@iconify-json/logos": "^1.2.15",
-        "@luna-park/design": "^1.3.0",
-        "@luna-park/eslint-config": "^1.4.3",
-        "@luna-park/plugin": "^1.8.0",
-        "@types/node": "^26.6.3",
-        "@vitejs/plugin-vue": "^6.0.9",
+        "@iconify-json/logos": "^1.2.19",
+        "@luna-park/design": "^1.7.0",
+        "@luna-park/eslint-config": "^1.4.5",
+        "@luna-park/plugin": "^2.1.0",
+        "@types/node": "^26.6.6",
+        "@vitejs/plugin-vue": "^6.0.10",
         "@vue/tsconfig": "^0.9.1",
-        "eslint": "^10.11.0",
-        "globals": "^17.12.0",
+        "eslint": "^10.14.0",
+        "globals": "^17.14.0",
         "histoire": "1.0.0-beta.1",
         "typescript": "^6.0.3",
-        "typescript-eslint": "^8.71.0",
+        "typescript-eslint": "^8.72.1",
         "unplugin-icons": "^24.0.0",
-        "vite": "^8.3.1",
-        "vite-plugin-css-injected-by-js": "^5.0.2",
-        "vue-tsc": "^3.3.11"
+        "vite": "^8.3.6",
+        "vite-plugin-css-injected-by-js": "^5.0.3",
+        "vue-tsc": "^3.3.14"
     },
     "peerDependencies": {
-        "@luna-park/design": "^1.3.0",
+        "@luna-park/design": "^1.7.0",
         "vue": "^3.5.24"
     }
 }

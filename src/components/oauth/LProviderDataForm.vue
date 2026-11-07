@@ -1,14 +1,9 @@
 <template>
     <div class="provider-data">
-        <div class="header">
-            <div class="title">
-                {{ title }}
-            </div>
-            <div class="description">
-                {{ description }}
-            </div>
-        </div>
-        <div class="content">
+        <p class="description">
+            {{ description }}
+        </p>
+        <div class="fields">
             <LInput
                 v-model="providerData.client.id"
                 label="Client ID"
@@ -18,56 +13,63 @@
                 v-model="providerData.client.secret"
                 label="Client secret"
                 placeholder="abc123"
+                type="password"
             />
             <LInput
                 v-model="providerData.url.redirect"
+                class="wide"
                 label="Redirect URL"
                 :placeholder="redirectPlaceholder"
             />
-            <LButton
-                v-if="collapsible"
-                class="toggle"
-                :icon="showEndpoints ? faChevronUp : faChevronDown"
-                small
-                transparent
-                @click="showEndpoints = !showEndpoints"
-            >
-                {{ showEndpoints ? "Hide" : "Show" }} endpoints
-            </LButton>
-            <template v-if="showEndpoints">
-                <hr>
-                <LInput
-                    v-model="providerData.url.authorization"
-                    label="Authorization URL"
-                    placeholder="https://example.com/oauth2/authorize"
-                />
-                <LInput
-                    v-model="providerData.url.token"
-                    label="Token URL"
-                    placeholder="https://example.com/oauth2/token"
-                />
-                <LInput
-                    v-model="providerData.scope"
-                    label="Scope"
-                    placeholder="openid email profile"
-                />
-                <hr>
-                <LInput
-                    v-model="providerData.api.url"
-                    label="API target"
-                    placeholder="https://example.com/api/me"
-                />
-                <LInput
-                    v-model="providerData.api.value"
-                    label="API value path"
-                    placeholder="mail"
-                />
-                <LInput
-                    v-model="providerData.api.id"
-                    label="API id path"
-                    placeholder="id"
-                />
-            </template>
+        </div>
+        <LButton
+            v-if="collapsible"
+            class="toggle"
+            :icon="showAdvanced ? faChevronUp : faChevronDown"
+            small
+            transparent
+            @click="showAdvanced = !showAdvanced"
+        >
+            {{ showAdvanced ? "Hide" : "Show" }} advanced
+        </LButton>
+        <div
+            v-if="showAdvanced"
+            class="fields"
+        >
+            <LInput
+                v-model="providerData.url.authorization"
+                class="wide"
+                label="Authorization URL"
+                placeholder="https://example.com/oauth2/authorize"
+            />
+            <LInput
+                v-model="providerData.url.token"
+                class="wide"
+                label="Token URL"
+                placeholder="https://example.com/oauth2/token"
+            />
+            <LInput
+                v-model="providerData.scope"
+                class="wide"
+                label="Scope"
+                placeholder="openid email profile"
+            />
+            <LInput
+                v-model="providerData.api.url"
+                class="wide"
+                label="API target"
+                placeholder="https://example.com/api/me"
+            />
+            <LInput
+                v-model="providerData.api.value"
+                label="API value path"
+                placeholder="mail"
+            />
+            <LInput
+                v-model="providerData.api.id"
+                label="API id path"
+                placeholder="id"
+            />
         </div>
     </div>
 </template>
@@ -80,55 +82,39 @@ import { ref } from "vue";
 import type { TProviderData } from "@/internals/providers.ts";
 
 const props = defineProps<{
-    title: string;
     collapsible?: boolean;
     description: string;
     providerData: TProviderData;
     redirectPlaceholder: string;
 }>();
 
-const showEndpoints = ref(!props.collapsible);
+const showAdvanced = ref(!props.collapsible);
 </script>
 
 <style scoped>
 .provider-data {
-    border: 1px solid var(--color-soft-lite);
-    border-radius: var(--length-radius-s);
-    padding: var(--length-xs);
     display: flex;
     flex-direction: column;
     gap: var(--length-s);
 
-    .header {
-        display: flex;
-        flex-direction: column;
-        gap: var(--length-xxs);
+    .description {
+        margin: 0;
+        font-size: var(--font-size-xs);
+        color: var(--color-content-liter);
+    }
 
-        .title {
-            font-size: var(--font-size-s);
-            font-weight: 500;
-        }
+    .fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--length-s);
 
-        .description {
-            font-size: var(--font-size-s);
-            color: var(--color-content-litest);
+        .wide {
+            grid-column: 1 / -1;
         }
     }
 
-    .content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--length-s);
-
-        .toggle {
-            align-self: flex-start;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid var(--color-soft-lite);
-            width: 80%;
-        }
+    .toggle {
+        align-self: flex-start;
     }
 }
 </style>
