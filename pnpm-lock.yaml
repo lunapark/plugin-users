@@ -46,8 +46,8 @@ importers:
         specifier: ^1.4.5
         version: 1.4.5(93da1fa0c93d8ffe922a1bfbfdb94b8e)
       '@luna-park/plugin':
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.2.0
+        version: 2.2.0
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
@@ -630,8 +630,8 @@ packages:
   '@luna-park/http-errors@1.0.0':
     resolution: {integrity: sha512-KITb2Ij2uUBPPVPmmo6UeWrCklYU1vx7TD1pUfgqjduK74eox7MjlGCpqv5i5Pul5l0053YNN5RN4oExrfqocQ==}
 
-  '@luna-park/plugin@2.1.0':
-    resolution: {integrity: sha512-9oMH4AWJ5gfAHi/IOgBQc909G9zBqiSXA6bIXc9/FsW/Vr9ole3lVCpG2+oMtTOk8YnNrfRjxijyTQt3WUUOTA==}
+  '@luna-park/plugin@2.2.0':
+    resolution: {integrity: sha512-4Ywxj4gkPssBYzytx/qVOU5BqRG7/Ny/nkoJ815uxd/MK5ezGK9scFexG/0WECF8DHBY9r/pdxi9EwcSXWA6Sw==}
     hasBin: true
 
   '@luna-park/utils@2.0.0':
@@ -3559,7 +3559,7 @@ snapshots:
 
   '@luna-park/http-errors@1.0.0': {}
 
-  '@luna-park/plugin@2.1.0':
+  '@luna-park/plugin@2.2.0':
     dependencies:
       '@electric-sql/pglite': 0.5.15
       '@fastify/cors': 11.4.1

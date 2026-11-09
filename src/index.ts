@@ -27,11 +27,12 @@ export default makePlugin({
     icon,
     internals,
     lifecycle: {
-        mount: async ({ addFile, app, backend, getFile }) => {
+        mount: async ({ addFile, app, backend, getFile, host }) => {
             env.addFile = addFile;
             env.getFile = getFile;
             env.app = app;
             env.backend = backend;
+            env.host = host;
 
             initGeneralSettings();
 

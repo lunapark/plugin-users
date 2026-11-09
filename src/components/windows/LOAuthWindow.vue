@@ -8,12 +8,22 @@
 import { useUrlSearchParams } from "@vueuse/core";
 import { onMounted, ref } from "vue";
 
+import { getLoopbackRedirect } from "@/editor/oauth.ts";
+
 const status = ref("Loading...");
 
 onMounted(async () => {
     const { code, error, error_description: errorDescription, state } = useUrlSearchParams();
 
     if (!window.opener) {
+        const redirect = getLoopbackRedirect(window.location.search);
+
+        if (redirect) {
+            status.value = "Returning to Luna Park...";
+            window.location.replace(redirect);
+            return;
+        }
+
         status.value = "Error: No opener window found.";
         return;
     }

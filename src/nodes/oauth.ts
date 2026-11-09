@@ -1,10 +1,10 @@
 import { ELogicScope, LogicType, makeLogicNode } from "@luna-park/plugin";
 
+import { requestOAuthCode } from "@/editor/oauth.ts";
 import { generateUserStoreUpdate, setUserStore } from "@/files/store/user.ts";
 import { internals } from "@/internals";
 import type { TConnectMode } from "@/runtime/connect.ts";
-import { authConnect, authLink, getAuthorizationUrl } from "@/runtime/connect.ts";
-import { generateHexToken } from "@/runtime/hash.ts";
+import { authConnect, authLink } from "@/runtime/connect.ts";
 import { requireCurrentSession } from "@/runtime/session.ts";
 
 function getProviderInput() {
@@ -15,41 +15,6 @@ function getProviderInput() {
             enum: Object.fromEntries(Object.entries(internals.providers).map(([id, provider]) => [id, provider.label]))
         })
     });
-}
-
-function waitForOAuthCode(url: string, state: string) {
-    return new Promise<string | undefined>((resolve) => {
-        const popup = window.open(url, "_blank", "width=400,height=600");
-        const listener = (event: MessageEvent) => {
-            if (event.origin === window.location.origin && event.source === popup && event.data?.state === state) {
-                finish(event.data.code);
-            }
-        };
-        const interval = setInterval(() => {
-            if (!popup || popup.closed) {
-                finish();
-            }
-        }, 500);
-
-        function finish(code?: string) {
-            clearInterval(interval);
-            window.removeEventListener("message", listener);
-            resolve(code);
-        }
-
-        window.addEventListener("message", listener);
-    });
-}
-
-async function requestOAuthCode(providerId: string) {
-    const provider = internals.providers[providerId]?.data.development;
-
-    if (!provider?.url.authorization) {
-        throw new Error("OAuth provider is not configured.");
-    }
-
-    const state = generateHexToken(16);
-    return await waitForOAuthCode(getAuthorizationUrl(provider, state), state);
 }
 
 function generateOAuthPopup(mode: string, output: string, onConnected = "") {
