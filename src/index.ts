@@ -59,6 +59,7 @@ export default makePlugin({
     },
     api: getApi,
     workspace: {
+        openOnClick: true,
         sections: [
             {
                 id: "sign-in",
