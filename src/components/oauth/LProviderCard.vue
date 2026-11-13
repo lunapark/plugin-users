@@ -33,12 +33,22 @@
                 :preset="preset"
                 :provider="provider"
             />
-            <LSegmented
-                v-model="environment"
-                class="environment"
-                :options="environmentOptions"
-                small
-            />
+            <div class="environment">
+                <LSegmented
+                    v-model="environment"
+                    :options="environmentOptions"
+                    small
+                />
+                <LButton
+                    v-if="environment === 'development'"
+                    :icon="faPlug"
+                    :loading="testing"
+                    small
+                    @click="testConnection"
+                >
+                    Test connection
+                </LButton>
+            </div>
             <LContainer
                 v-if="environment === 'production' && missingProductionFields.length"
                 small
@@ -84,14 +94,15 @@
 </template>
 
 <script setup lang="ts">
-import { faChevronDown, faChevronUp, faTrash, faTriangleExclamation } from "@fortawesome/pro-solid-svg-icons";
+import { faChevronDown, faChevronUp, faPlug, faTrash, faTriangleExclamation } from "@fortawesome/pro-solid-svg-icons";
 import type { TOptions } from "@luna-park/design";
-import { confirm, EContainerType, LButton, LCard, LContainer, LIcon, LInput, LSegmented, LSettingRow } from "@luna-park/design";
+import { confirm, EContainerType, LButton, LCard, LContainer, LIcon, LInput, LSegmented, LSettingRow, useToastStore } from "@luna-park/design";
 import { computed, ref } from "vue";
 
 import LProviderDataForm from "@/components/oauth/LProviderDataForm.vue";
 import LProviderGuide from "@/components/oauth/LProviderGuide.vue";
 import LProviderLogo from "@/components/oauth/LProviderLogo.vue";
+import { testOAuthConnection } from "@/editor/oauth.ts";
 import { getProviderPreset } from "@/internals/presets.ts";
 import type { TProvider } from "@/internals/providers.ts";
 import { developmentRedirectUrl, getMissingProductionFields, productionRedirectUrl } from "@/internals/providers.ts";
@@ -106,6 +117,8 @@ const emits = defineEmits<{
 
 const opened = defineModel<boolean>("opened", { default: false });
 const environment = ref<"development" | "production">("development");
+const testing = ref(false);
+const toasts = useToastStore();
 
 const preset = computed(() => getProviderPreset(props.provider.preset));
 const missingProductionFields = computed(() => getMissingProductionFields(props.provider));
@@ -118,6 +131,32 @@ const environmentOptions = computed(() => [
         ...missingProductionFields.value.length ? { icon: { color: "var(--color-warning)", icon: faTriangleExclamation } } : {}
     }
 ] satisfies TOptions);
+
+async function testConnection() {
+    testing.value = true;
+
+    try {
+        const identity = await testOAuthConnection(props.provider.id);
+
+        if (identity) {
+            toasts.add({
+                message: `Signed in as ${ identity.value } (id ${ identity.id }).`,
+                title: "Connection successful",
+                type: EContainerType.Success
+            });
+        }
+    }
+    catch (error) {
+        toasts.add({
+            message: error instanceof Error ? error.message : String(error),
+            title: "Connection failed",
+            type: EContainerType.Error
+        });
+    }
+    finally {
+        testing.value = false;
+    }
+}
 
 async function deleteProvider() {
     if (await confirm("Are you sure you want to delete this provider?")) {
@@ -174,7 +213,10 @@ async function deleteProvider() {
         border-top: 1px solid var(--color-background-2);
 
         .environment {
-            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--length-xs);
         }
     }
 

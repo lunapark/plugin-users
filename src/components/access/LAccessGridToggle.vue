@@ -1,8 +1,7 @@
 <template>
-    <LCheckbox
-        v-model="value"
-        class="toggle"
-    />
+    <div class="toggle">
+        <LCheckbox v-model="value" />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -31,6 +30,8 @@ const value = computed({
 
 <style scoped>
 .toggle {
-    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

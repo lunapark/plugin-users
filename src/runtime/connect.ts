@@ -167,7 +167,7 @@ async function readJson(response: Response, label: string) {
     }
 }
 
-async function getIdentity(provider: TProviderData, code: string) {
+export async function getIdentity(provider: TProviderData, code: string) {
     const tokenResponse = await fetch(provider.url.token, {
         body: new URLSearchParams({
             client_id: provider.client.id,

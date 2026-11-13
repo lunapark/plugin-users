@@ -1,7 +1,7 @@
 import { env } from "@/env.ts";
 import { internals } from "@/internals";
 import type { TProviderData } from "@/internals/providers.ts";
-import { getAuthorizationUrl } from "@/runtime/connect.ts";
+import { getAuthorizationUrl, getIdentity } from "@/runtime/connect.ts";
 import { generateHexToken } from "@/runtime/hash.ts";
 
 const loopbackState = /^[0-9a-f]{32}\.(\d{1,5})$/;
@@ -77,4 +77,20 @@ export async function requestOAuthCode(providerId: string) {
     }
 
     return await waitForPopupCode(getAuthorizationUrl(provider, state), state);
+}
+
+export async function testOAuthConnection(providerId: string) {
+    const code = await requestOAuthCode(providerId);
+
+    if (!code) {
+        return;
+    }
+
+    const identity = await getIdentity(internals.providers[providerId]!.data.development, code);
+
+    if (!identity.id || !identity.value) {
+        throw new Error("Connected, but the identity response has no id or value at the configured API paths.");
+    }
+
+    return identity;
 }
