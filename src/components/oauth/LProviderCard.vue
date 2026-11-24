@@ -64,6 +64,7 @@
                 description="Used in the editor, for testing purposes."
                 :provider-data="provider.data.development"
                 :redirect-placeholder="developmentRedirectUrl"
+                :secret-name="getProviderSecretNames(provider.id).development"
             />
             <LProviderDataForm
                 v-else
@@ -72,6 +73,7 @@
                 description="Used in production. Empty fields fall back to development values, except the redirect URL."
                 :provider-data="provider.data.production"
                 :redirect-placeholder="productionRedirectUrl"
+                :secret-name="getProviderSecretNames(provider.id).production"
             />
         </div>
 
@@ -106,6 +108,7 @@ import { testOAuthConnection } from "@/editor/oauth.ts";
 import { getProviderPreset } from "@/internals/presets.ts";
 import type { TProvider } from "@/internals/providers.ts";
 import { developmentRedirectUrl, getMissingProductionFields, productionRedirectUrl } from "@/internals/providers.ts";
+import { getProviderSecretNames } from "@/internals/secrets.ts";
 
 const props = defineProps<{
     provider: TProvider;

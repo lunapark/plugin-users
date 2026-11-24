@@ -9,11 +9,11 @@
                 label="Client ID"
                 placeholder="abc123"
             />
-            <LInput
-                v-model="providerData.client.secret"
+            <LSecretInput
                 label="Client secret"
+                :name="secretName"
                 placeholder="abc123"
-                type="password"
+                :secrets="env.secrets"
             />
             <LInput
                 v-model="providerData.url.redirect"
@@ -77,8 +77,10 @@
 <script setup lang="ts">
 import { faChevronDown, faChevronUp } from "@fortawesome/pro-solid-svg-icons";
 import { LButton, LInput } from "@luna-park/design";
+import { LSecretInput } from "@luna-park/plugin/components";
 import { ref } from "vue";
 
+import { env } from "@/env.ts";
 import type { TProviderData } from "@/internals/providers.ts";
 
 const props = defineProps<{
@@ -86,6 +88,7 @@ const props = defineProps<{
     description: string;
     providerData: TProviderData;
     redirectPlaceholder: string;
+    secretName: string;
 }>();
 
 const showAdvanced = ref(!props.collapsible);

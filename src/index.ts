@@ -8,6 +8,7 @@ import LPasswordSection from "@/components/general/LPasswordSection.vue";
 import LSignInSection from "@/components/general/LSignInSection.vue";
 import LOAuthSection from "@/components/oauth/LOAuthSection.vue";
 import LOAuthWindow from "@/components/windows/LOAuthWindow.vue";
+import { config } from "@/config.ts";
 import { configureEditorRuntime } from "@/editor/runtime.ts";
 import { env } from "@/env.ts";
 import { initSessionsDatabase } from "@/files/database/sessions.ts";
@@ -16,7 +17,9 @@ import { initUserStore, setUserStore } from "@/files/store/user.ts";
 import { getGuards } from "@/guards.ts";
 import { hooks } from "@/hooks";
 import { initGeneralSettings, internals } from "@/internals";
+import { syncProviderSecrets } from "@/internals/secrets.ts";
 import icon from "@/logo.svg";
+import { migrateSecrets } from "@/migrations/secrets.ts";
 import { getNodes } from "@/nodes";
 import { resolveUser } from "@/runtime/session.ts";
 
@@ -25,16 +28,21 @@ export default makePlugin({
     name: "Users",
     description: "Add user accounts, connections, and roles.",
     icon,
+    config,
     internals,
     lifecycle: {
-        mount: async ({ addFile, app, backend, getFile, host }) => {
-            env.addFile = addFile;
-            env.getFile = getFile;
-            env.app = app;
-            env.backend = backend;
-            env.host = host;
+        mount: async (pluginEnv) => {
+            env.addFile = pluginEnv.addFile;
+            env.getFile = pluginEnv.getFile;
+            env.app = pluginEnv.app;
+            env.backend = pluginEnv.backend;
+            env.config = pluginEnv.config;
+            env.host = pluginEnv.host;
+            env.secrets = pluginEnv.secrets;
 
             initGeneralSettings();
+            syncProviderSecrets();
+            await migrateSecrets(pluginEnv);
 
             await initUsersDatabase();
             await initSessionsDatabase();

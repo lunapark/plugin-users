@@ -13,7 +13,7 @@ export type TProviderData = {
     };
     client: {
         id: string;
-        secret: string;
+        secret?: string;
     };
     scope?: string;
     url: {
@@ -31,8 +31,7 @@ export function createProviderData(preset?: TProviderPreset, identifier?: EIdent
             value: (preset && identifier) ? preset.api.value[identifier] : ""
         },
         client: {
-            id: "",
-            secret: ""
+            id: ""
         },
         scope: preset?.scope ?? "",
         url: {
@@ -79,8 +78,7 @@ export function resolveProductionData(provider: TProvider): TProviderData {
             value: production.api.value || development.api.value
         },
         client: {
-            id: production.client.id || development.client.id,
-            secret: production.client.secret || development.client.secret
+            id: production.client.id || development.client.id
         },
         scope: production.scope || development.scope,
         url: {
@@ -95,7 +93,6 @@ export function getMissingProductionFields(provider: TProvider) {
     const data = resolveProductionData(provider);
     const fields: Array<[string, string]> = [
         ["Client ID", data.client.id],
-        ["Client secret", data.client.secret],
         ["Redirect URL", data.url.redirect],
         ["Authorization URL", data.url.authorization],
         ["Token URL", data.url.token],

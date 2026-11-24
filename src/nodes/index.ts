@@ -1,5 +1,6 @@
 import type { TEnv } from "@luna-park/plugin";
 
+import type { TConfig } from "@/config.ts";
 import type { TInternals } from "@/internals";
 import { getDefaultPasswordPolicy } from "@/internals/general.ts";
 import hashNodes from "@/nodes/hash.ts";
@@ -9,7 +10,7 @@ import rolesNodes from "@/nodes/roles.ts";
 import sessionsNodes from "@/nodes/sessions.ts";
 import userNodes from "@/nodes/user.ts";
 
-export function getNodes({ internals }: TEnv<never, TInternals>) {
+export function getNodes({ internals }: TEnv<TConfig, TInternals>) {
     return [
         ...hashNodes,
         ...rolesNodes,

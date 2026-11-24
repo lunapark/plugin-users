@@ -1,5 +1,6 @@
 import type { TEnv } from "@luna-park/plugin";
 
+import type { TConfig } from "@/config.ts";
 import type { TInternals } from "@/internals";
 import { onUserDelete } from "@/runtime/account.ts";
 import type { TPublicUser } from "@/runtime/config.ts";
@@ -12,7 +13,7 @@ export type TUsersApi = {
     usersTable: () => string | undefined;
 };
 
-export function getApi({ internals }: TEnv<never, TInternals>): TUsersApi {
+export function getApi({ internals }: TEnv<TConfig, TInternals>): TUsersApi {
     return {
         onUserDelete,
         resolveUser,

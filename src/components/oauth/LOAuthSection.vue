@@ -38,6 +38,7 @@ import LProviderPicker from "@/components/oauth/LProviderPicker.vue";
 import { internals } from "@/internals";
 import type { TProviderPreset } from "@/internals/presets.ts";
 import { createProvider } from "@/internals/providers.ts";
+import { removeProviderSecrets, syncProviderSecrets } from "@/internals/secrets.ts";
 
 const openedId = ref("");
 const picking = ref(false);
@@ -50,10 +51,12 @@ function addProvider(preset?: TProviderPreset) {
     internals.providers[provider.id] = provider;
     openedId.value = provider.id;
     picking.value = false;
+    syncProviderSecrets();
 }
 
 function deleteProvider(providerId: string) {
     delete internals.providers[providerId];
+    void removeProviderSecrets(providerId);
 }
 </script>
 

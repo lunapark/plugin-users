@@ -171,7 +171,7 @@ export async function getIdentity(provider: TProviderData, code: string) {
     const tokenResponse = await fetch(provider.url.token, {
         body: new URLSearchParams({
             client_id: provider.client.id,
-            client_secret: provider.client.secret,
+            client_secret: provider.client.secret ?? "",
             code,
             grant_type: "authorization_code",
             redirect_uri: provider.url.redirect

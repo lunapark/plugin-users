@@ -1,11 +1,14 @@
 import type { TEnv } from "@luna-park/plugin";
-import { EInjectionKey } from "@luna-park/plugin";
+import { EInjectionKey, getPluginSecretEnvName } from "@luna-park/plugin";
 
+import type { TConfig } from "@/config.ts";
 import { generateUserStoreUpdate } from "@/files/store/user.ts";
 import type { TInternals } from "@/internals";
 import { getDefaultPasswordPolicy } from "@/internals/general.ts";
 import { resolveProductionData } from "@/internals/providers.ts";
 import { getRolesPermissions } from "@/internals/roles.ts";
+import { getProviderSecretNames } from "@/internals/secrets.ts";
+import { getLegacySecretEnv } from "@/migrations/secrets.ts";
 import { serverTarget } from "@/nodes/user.ts";
 
 import packageDefinition from "../package.json" with { type: "json" };
@@ -13,20 +16,17 @@ import packageDefinition from "../package.json" with { type: "json" };
 export const backImports = [{ name: packageDefinition.name, version: packageDefinition.version }];
 export const frontImports = backImports;
 
-function getSecretEnvKey(providerId: string) {
-    return `USERS_OAUTH_SECRET_${ providerId.replaceAll(/[^a-zA-Z0-9]/g, "_").toUpperCase() }`;
+export function getEnv(env: TEnv<TConfig, TInternals>) {
+    return getLegacySecretEnv(env);
 }
 
-export function getEnv({ internals }: TEnv<never, TInternals>) {
-    return Object.fromEntries(Object.values(internals.providers)
-        .map((provider) => [getSecretEnvKey(provider.id), resolveProductionData(provider).client.secret]));
-}
-
-export function getInjections({ internals }: TEnv<never, TInternals>) {
+export function getInjections({ internals }: TEnv<TConfig, TInternals>) {
+    const secrets: Record<string, string> = {};
     const providers = JSON.stringify(Object.fromEntries(Object.values(internals.providers).map((provider) => {
-        const production = resolveProductionData(provider);
-        return [provider.id, { ...production, client: { ...production.client, secret: getSecretEnvKey(provider.id) } }];
-    }))).replaceAll(/"(USERS_OAUTH_SECRET_\w+)"/g, "process.env.$1");
+        const names = getProviderSecretNames(provider.id);
+        secrets[names.production] = `(process.env[${ JSON.stringify(getPluginSecretEnvName("users", names.production)) }] || process.env[${ JSON.stringify(getPluginSecretEnvName("users", names.development)) }])`;
+        return [provider.id, { ...resolveProductionData(provider), client: { id: resolveProductionData(provider).client.id, secret: `__secret:${ names.production }` } }];
+    }))).replaceAll(/"__secret:(\w+)"/g, (match, name: string) => secrets[name] ?? match);
 
     // language=JavaScript
     const serverImport = `

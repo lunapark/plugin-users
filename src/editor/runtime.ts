@@ -1,6 +1,7 @@
 import { database, env } from "@/env.ts";
 import { internals } from "@/internals";
 import { getRolesPermissions } from "@/internals/roles.ts";
+import { getProviderSecretNames } from "@/internals/secrets.ts";
 import type { TSessionRecord, TUserRecord } from "@/runtime/config.ts";
 import { configureUsers } from "@/runtime/config.ts";
 import { generateHexToken } from "@/runtime/hash.ts";
@@ -18,7 +19,12 @@ export function configureEditorRuntime() {
                 return internals.general.password;
             },
             get providers() {
-                return Object.fromEntries(Object.values(internals.providers).map((provider) => [provider.id, provider.data.development]));
+                return Object.fromEntries(Object.values(internals.providers).map((provider) => {
+                    const { development } = provider.data;
+                    const secret = env.secrets?.values[getProviderSecretNames(provider.id).development] ?? "";
+
+                    return [provider.id, { ...development, client: { ...development.client, secret } }];
+                }));
             },
             get roles() {
                 return getRolesPermissions(internals.roles);
